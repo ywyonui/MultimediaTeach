@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{FBE3E0B3-40B9-4DE2-88D6-A6FD171D9B96}</ProjectGuid>
-    <RootNamespace>Teacher</RootNamespace>
+    <ProjectGuid>{62172AB9-8E27-40C9-876E-B0D06D3BA6F2}</ProjectGuid>
+    <RootNamespace>Student</RootNamespace>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -43,8 +43,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Configuration)\bin\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)$(Configuration)\obj\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -103,26 +101,26 @@
   <ItemGroup>
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Student.h" />
+    <ClInclude Include="StudentDlg.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Teacher.h" />
-    <ClInclude Include="TeacherDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Teacher.cpp" />
-    <ClCompile Include="TeacherDlg.cpp" />
+    <ClCompile Include="Student.cpp" />
+    <ClCompile Include="StudentDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Teacher.rc" />
+    <ResourceCompile Include="Student.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\Teacher.rc2" />
+    <None Include="res\Student.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Teacher.ico" />
+    <Image Include="res\Student.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

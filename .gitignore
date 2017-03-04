@@ -1,2 +1,5 @@
 /*.sdf
 /*.opensdf
+/ipch
+/Debug
+/Release
