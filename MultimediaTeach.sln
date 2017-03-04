@@ -4,10 +4,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Teacher", "Teacher\Teacher.vcxproj", "{FBE3E0B3-40B9-4DE2-88D6-A6FD171D9B96}"
+	ProjectSection(ProjectDependencies) = postProject
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C} = {006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}
+		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC} = {90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net", "Net\Net.vcxproj", "{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Student", "Student\Student.vcxproj", "{62172AB9-8E27-40C9-876E-B0D06D3BA6F2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C} = {006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}
+		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC} = {90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj", "{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}"
 EndProject
