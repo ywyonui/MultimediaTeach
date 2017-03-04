@@ -8,11 +8,6 @@
 **/
 /***************************************************************************************/
 
-// 定义宏，用于DLL中的函数导出
-#ifndef NET_API
-#define NET_API __declspec(dllexport)
-#endif
-
 #include <mysql.h>
 #include <vector>
 
@@ -20,7 +15,7 @@
 	类    型 :	
 	功能说明 :	
 */
-class NET_API CDBMySQL
+class CDBMySQL
 {
 private:
 	CDBMySQL();

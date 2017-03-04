@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "UserMgr.h"
 
-#include "DBMySQL.h"
+#include "DataBase/DBMySQL.h"
 
 CUserMgr::CUserMgr()
 {
