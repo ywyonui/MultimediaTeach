@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{FBE3E0B3-40B9-4DE2-88D6-A6FD171D9B96}</ProjectGuid>
-    <RootNamespace>Teacher</RootNamespace>
+    <ProjectGuid>{19418C99-147C-47BC-B7C3-256EA6A1A57D}</ProjectGuid>
+    <RootNamespace>Server</RootNamespace>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -43,8 +43,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Configuration)\bin\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)$(Configuration)\obj\$(ProjectName)\</IntDir>
     <IncludePath>$(SolutionDir)Net\;$(SolutionDir)Core\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration)\bin\Net\;$(SolutionDir)$(Configuration)\bin\Core\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -110,28 +108,28 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
   <ItemGroup>
     <ClInclude Include="Logic\MsgHelperMain.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Server.h" />
+    <ClInclude Include="ServerDlg.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Teacher.h" />
-    <ClInclude Include="TeacherDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Logic\MsgHelperMain.cpp" />
+    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="ServerDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Teacher.cpp" />
-    <ClCompile Include="TeacherDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Teacher.rc" />
+    <ResourceCompile Include="Server.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\Teacher.rc2" />
+    <None Include="res\Server.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Teacher.ico" />
+    <Image Include="res\Server.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

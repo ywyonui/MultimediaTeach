@@ -16,7 +16,7 @@
     <Filter Include="Logic">
       <UniqueIdentifier>{a40ed100-d7ed-4ca4-8424-ed2bde355895}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Dlg">
+    <Filter Include="UI">
       <UniqueIdentifier>{79c9c580-c31a-4f2f-8af7-b5c452e0be8b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

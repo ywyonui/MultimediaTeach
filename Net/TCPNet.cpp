@@ -305,6 +305,7 @@ DWORD WINAPI CTCPNet::ServerWorkerThread(void* vParam)
 			{
 				cout << "客户端断开连接" << endl;
 				// 在AcceptConnectThread里面new出来的，因此每个客户端断开时delete掉
+				pMsgHelper->DisconnectCallBack(sClient);
 				delete lpPerIOData;
 				lpPerIOData = NULL;
 			}
@@ -318,7 +319,6 @@ DWORD WINAPI CTCPNet::ServerWorkerThread(void* vParam)
 					// 激活一个WSARecv(代替recv)
 					GetInstance().RegisterWSARecv(sClient, lpPerIOData);
 				}
-
 			}
 			break;
 		}
@@ -346,6 +346,7 @@ DWORD WINAPI CTCPNet::ClientWorkerThread(void* vParam)
 		if (SOCKET_ERROR == nNum)
 		{
 			cout << "和服务器断开连接" << endl;
+			pMsgHelper->DisconnectCallBack(0);
 			break;
 		}
 		pMsgHelper->NetMsgCallBack(0, szBuff, nLen);

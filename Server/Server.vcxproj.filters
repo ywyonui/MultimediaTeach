@@ -13,21 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Logic">
-      <UniqueIdentifier>{8c26c232-b527-4ff1-9624-d5105167c5b1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="UI">
-      <UniqueIdentifier>{800913f3-49d8-4eba-8739-809df403821c}</UniqueIdentifier>
+      <UniqueIdentifier>{c10ee72d-d82d-4be4-b7bc-87c854aa2783}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logic">
+      <UniqueIdentifier>{4cf2f0ab-84a3-4811-a09e-1eb3ac8d7e30}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Teacher.h">
+    <ClInclude Include="Server.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="TeacherDlg.h">
+    <ClInclude Include="ServerDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
@@ -44,10 +44,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Teacher.cpp">
+    <ClCompile Include="Server.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="TeacherDlg.cpp">
+    <ClCompile Include="ServerDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
@@ -58,17 +58,17 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Teacher.rc">
+    <ResourceCompile Include="Server.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\Teacher.rc2">
+    <None Include="res\Server.rc2">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Teacher.ico">
+    <Image Include="res\Server.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

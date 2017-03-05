@@ -56,6 +56,4 @@ enum EResultType
 	eLoginError = -1,	// µÇÂ½Ê§°Ü
 };
 
-#define DESK_MAX_PLAYER	3
-
 
