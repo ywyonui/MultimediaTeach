@@ -44,6 +44,17 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 }
 
 /*************************************************************
+函数名称:	NetMsgCallBack
+参数说明:	dwID:	客户端Socket,0表示服务器，其他表示服务器接收到客户端断开
+返 回 值:	void
+功能说明:	断开连接是个特殊事件，客户端和服务器处理方式不同，因此留出接口重写，默认版本什么都不做
+*************************************************************/
+void CMsgHelperMain::DisconnectCallBack(DWORD dwID)
+{
+
+}
+
+/*************************************************************
 函数名称:	SetHwnd
 参数说明:	hWnd:	关联窗口
 返 回 值:	void
