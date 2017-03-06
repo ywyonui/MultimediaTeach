@@ -25,11 +25,16 @@ CDlgMain::CDlgMain(CWnd* pParent /*=NULL*/)
 void CDlgMain::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BTN_HAND, m_btn_hand);
+	DDX_Control(pDX, IDC_BTN_SUBMIT, m_btn_submit);
+	DDX_Control(pDX, IDC_LIST_T, m_list_t);
+	DDX_Control(pDX, IDC_LIST_S, m_list_s);
 }
 
 BEGIN_MESSAGE_MAP(CDlgMain, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -45,6 +50,10 @@ BOOL CDlgMain::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
+	int nSW = GetSystemMetrics(SM_CXSCREEN);
+	int nSH = GetSystemMetrics(SM_CYSCREEN);
+
+	MoveWindow(static_cast<int>(nSW * 0.1), static_cast<int>(nSH * 0.1), static_cast<int>(nSW * 0.8), static_cast<int>(nSH * 0.8));
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -85,3 +94,30 @@ HCURSOR CDlgMain::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CDlgMain::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+
+	// TODO:  在此处添加消息处理程序代码
+	int nW = cx - 40;
+	int nH = cy - 210;
+
+	if (m_btn_hand.GetSafeHwnd())
+	{
+		m_btn_hand.MoveWindow(20, 20, 60, 30);
+	}
+	if (m_btn_submit.GetSafeHwnd())
+	{
+		m_btn_submit.MoveWindow(20 + 60, 20, 100, 30);
+	}
+	if (m_list_t.GetSafeHwnd())
+	{
+		m_list_t.MoveWindow(20, 70, nW, 100);
+	}
+	if (m_list_s.GetSafeHwnd())
+	{
+		m_list_s.MoveWindow(20, 190, nW, nH);
+	}
+}
