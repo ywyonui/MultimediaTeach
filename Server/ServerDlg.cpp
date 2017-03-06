@@ -7,6 +7,12 @@
 #include "ServerDlg.h"
 #include "afxdialogex.h"
 
+#include <string>
+
+#include "Logic/MsgHelperMain.h"
+#include "BLL/UserMgr.h"
+
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -25,8 +31,10 @@ CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 void CServerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_STATIC_ME, m_static_me);
 	DDX_Control(pDX, IDC_STATIC_T, m_static_t);
 	DDX_Control(pDX, IDC_STATIC_S, m_static_s);
+	DDX_Control(pDX, IDC_EDIT_ME, m_edit_me);
 	DDX_Control(pDX, IDC_EDIT_T, m_edit_t);
 	DDX_Control(pDX, IDC_EDIT_S, m_edit_s);
 }
@@ -35,6 +43,7 @@ BEGIN_MESSAGE_MAP(CServerDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -54,7 +63,37 @@ BOOL CServerDlg::OnInitDialog()
 	int nSH = GetSystemMetrics(SM_CYSCREEN);
 
 	MoveWindow(static_cast<int>(nSW * 0.1), static_cast<int>(nSH * 0.1), static_cast<int>(nSW * 0.8), static_cast<int>(nSH * 0.8));
+	
+	std::string strReturn = "";
+	// 连接数据库
+	if (!CUserMgr::GetInstance().ConnMySQL("192.168.18.100", 3306, "multimediateach", "test", "123456", "UTF-16", strReturn))
+	{
+		m_edit_me.SetWindowText(_T("数据库连接成功"));
+	}
+	else
+	{
+		CStringA strA(strReturn.c_str());
+		CString str(strA);
+		m_edit_me.SetWindowText(str);
+	}
+	
+	CMsgHelperMain& msgHelper = CMsgHelperMain::GetInstance();
 
+	CString str;
+	m_edit_me.GetWindowText(str);
+	str += _T("\r\n");
+
+	if (CTCPNet::GetInstance().InitNet(1234, &msgHelper))
+	{
+		str += _T("服务器启动成功");
+		m_edit_me.SetWindowText(str);
+	}
+	else
+	{
+		str += _T("服务器启动失败");
+		m_edit_me.SetWindowText(str);
+	}
+	
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -102,23 +141,48 @@ void CServerDlg::OnSize(UINT nType, int cx, int cy)
 	CDialogEx::OnSize(nType, cx, cy);
 
 	// TODO:  在此处添加消息处理程序代码
-	int nW = static_cast<int>((cx - 60) / 2);
+	int nW = static_cast<int>((cx - 80) / 3);
 	int nH = cy - 70;
+	int nX = 20;
 
+	if (m_static_me.GetSafeHwnd())
+	{
+		m_static_me.MoveWindow(nX, 20, 150, 30);
+		nX += 20 + nW;
+	}
 	if (m_static_t.GetSafeHwnd())
 	{
-		m_static_t.MoveWindow(20, 20, 150, 30);
+		m_static_t.MoveWindow(nX, 20, 150, 30);
+		nX += 20 + nW;
 	}
 	if (m_static_s.GetSafeHwnd())
 	{
-		m_static_s.MoveWindow(40 + nW, 20, 150, 30);
+		m_static_s.MoveWindow(nX, 20, 150, 30);
+		nX = 20;
+	}
+	if (m_edit_me.GetSafeHwnd())
+	{
+		m_edit_me.MoveWindow(nX, 50, nW, nH);
+		nX += 20 + nW;
 	}
 	if (m_edit_t.GetSafeHwnd())
 	{
-		m_edit_t.MoveWindow(20, 50, nW, nH);
+		m_edit_t.MoveWindow(nX, 50, nW, nH);
+		nX += 20 + nW;
 	}
 	if (m_edit_s.GetSafeHwnd())
 	{
-		m_edit_s.MoveWindow(40 + nW, 50, nW, nH);
+		m_edit_s.MoveWindow(nX, 50, nW, nH);
 	}
+}
+
+
+void CServerDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	// TODO:  在此处添加消息处理程序代码
+
+	// 断开数据库连接
+	CUserMgr::GetInstance().DisConnMySQL();
 }

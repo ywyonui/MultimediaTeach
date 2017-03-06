@@ -20,8 +20,10 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV Ö§³Ö
 
 protected:
+	CStatic m_static_me;
 	CStatic m_static_t;
 	CStatic m_static_s;
+	CEdit m_edit_me;
 	CEdit m_edit_t;
 	CEdit m_edit_s;
 
@@ -36,4 +38,5 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 
+	afx_msg void OnDestroy();
 };

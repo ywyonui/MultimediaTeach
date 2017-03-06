@@ -69,102 +69,101 @@ CTCPNet& CTCPNet::GetInstance(void)
 功能说明:	初始化网络环境
 *************************************************************/
 bool CTCPNet::InitNet(unsigned uPort, CBaseNetMsgHelper* pMsgHelper, bool bServer /*= true*/, char* pAddr /*= NULL*/)
+{
+	if (bServer)
 	{
+		// 如果是服务器
+		// 初始化网络 -> 创建SOCKET -> 绑定（接收连接的IP,端口）-> 监听 -> 接收连接 -> 消息
+		WSADATA wsaData;
+		WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-		if (bServer)
+		// 1、创建完成端口
+		HANDLE comletionPort = INVALID_HANDLE_VALUE;	// 完成端口
+		comletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+
+		// 创建CPU数的线程数
+		SYSTEM_INFO systemInfo;
+		GetSystemInfo(&systemInfo);
+
+		ST_ServerData stServer;
+		stServer.completionPort = comletionPort;
+		stServer.pMsgHelper = pMsgHelper;
+
+		for (int i = 0; i < (int)systemInfo.dwNumberOfProcessors; ++i)
 		{
-			// 如果是服务器
-			// 初始化网络 -> 创建SOCKET -> 绑定（接收连接的IP,端口）-> 监听 -> 接收连接 -> 消息
-			WSADATA wsaData;
-			WSAStartup(MAKEWORD(2, 2), &wsaData);
-
-			// 1、创建完成端口
-			HANDLE comletionPort = INVALID_HANDLE_VALUE;	// 完成端口
-			comletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-
-			// 创建CPU数的线程数
-			SYSTEM_INFO systemInfo;
-			GetSystemInfo(&systemInfo);
-
-			ST_ServerData stServer;
-			stServer.completionPort = comletionPort;
-			stServer.pMsgHelper = pMsgHelper;
-
-			for (int i = 0; i < (int)systemInfo.dwNumberOfProcessors; ++i)
-			{
-				CreateThread(NULL, 0, ServerWorkerThread, (void*)&stServer, 0, 0);
-			}
-
-			// 2、创建SOCKET
-			SOCKET sServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-			if (-1 == sServer)
-			{
-				cout << "创建网络环境失败" << endl;
-				return false;
-			}
-
-			m_ServerSocket = sServer;
-
-			// 3、绑定
-			SOCKADDR_IN addr;
-			memset(&addr, 0, sizeof(SOCKADDR_IN));
-			addr.sin_family = AF_INET;
-			addr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
-			addr.sin_port = htons(uPort);
-
-			int ret = bind(sServer, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN));
-			if (-1 == ret)
-			{
-				cout << "绑定套接字和地址端口失败" << endl;
-				return false;
-			}
-
-			// 4、监听
-			listen(sServer, 5);
-
-			// 5、接收连接，因为随时可能有玩家连接，所以要不停的接收连接，所以创建线程接收连接
-			CreateThread(0, 0, AcceptConnectThread, (void*)comletionPort, 0, 0);
-
-		}
-		else
-		{
-			// 如果是客户端
-			// 初始化网络 -> 创建SOCKET -> 绑定（接收连接的IP,端口）-> 监听 -> 接收连接 -> 消息
-			WSADATA wsaData;
-			WSAStartup(MAKEWORD(2, 2), &wsaData);
-
-			// 2、创建SOCKET
-			SOCKET sClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-			if (-1 == sClient)
-			{
-				cout << "创建网络环境失败" << endl;
-				return false;
-			}
-
-			SOCKADDR_IN addr;
-			memset(&addr, 0, sizeof(SOCKADDR_IN));
-			addr.sin_family = AF_INET;
-			addr.sin_addr.S_un.S_addr = inet_addr(pAddr);
-			addr.sin_port = htons(uPort);
-
-			int ret = connect(sClient, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN));
-
-			if (SOCKET_ERROR == ret)
-			{
-				cout << "服务器连接失败" << endl;
-				return false;
-			}
-
-			m_ClientSocket = sClient;
-
-			// 创建一个线程用来和服务器通信
-			CreateThread(0, 0, ClientWorkerThread, (void*)pMsgHelper, 0, 0);
+			CreateThread(NULL, 0, ServerWorkerThread, (void*)&stServer, 0, 0);
 		}
 
-		return true;
+		// 2、创建SOCKET
+		SOCKET sServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+		if (-1 == sServer)
+		{
+			cout << "创建网络环境失败" << endl;
+			return false;
+		}
+
+		m_ServerSocket = sServer;
+
+		// 3、绑定
+		SOCKADDR_IN addr;
+		memset(&addr, 0, sizeof(SOCKADDR_IN));
+		addr.sin_family = AF_INET;
+		addr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+		addr.sin_port = htons(uPort);
+
+		int ret = bind(sServer, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN));
+		if (-1 == ret)
+		{
+			cout << "绑定套接字和地址端口失败" << endl;
+			return false;
+		}
+
+		// 4、监听
+		listen(sServer, 5);
+
+		// 5、接收连接，因为随时可能有玩家连接，所以要不停的接收连接，所以创建线程接收连接
+		CreateThread(0, 0, AcceptConnectThread, (void*)comletionPort, 0, 0);
+
 	}
+	else
+	{
+		// 如果是客户端
+		// 初始化网络 -> 创建SOCKET -> 绑定（接收连接的IP,端口）-> 监听 -> 接收连接 -> 消息
+		WSADATA wsaData;
+		WSAStartup(MAKEWORD(2, 2), &wsaData);
+
+		// 2、创建SOCKET
+		SOCKET sClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+		if (-1 == sClient)
+		{
+			cout << "创建网络环境失败" << endl;
+			return false;
+		}
+
+		SOCKADDR_IN addr;
+		memset(&addr, 0, sizeof(SOCKADDR_IN));
+		addr.sin_family = AF_INET;
+		addr.sin_addr.S_un.S_addr = inet_addr(pAddr);
+		addr.sin_port = htons(uPort);
+
+		int ret = connect(sClient, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN));
+
+		if (SOCKET_ERROR == ret)
+		{
+			cout << "服务器连接失败" << endl;
+			return false;
+		}
+
+		m_ClientSocket = sClient;
+
+		// 创建一个线程用来和服务器通信
+		CreateThread(0, 0, ClientWorkerThread, (void*)pMsgHelper, 0, 0);
+	}
+
+	return true;
+}
 
 /*************************************************************
 函数名称:	SendToClient
@@ -305,9 +304,15 @@ DWORD WINAPI CTCPNet::ServerWorkerThread(void* vParam)
 			{
 				cout << "客户端断开连接" << endl;
 				// 在AcceptConnectThread里面new出来的，因此每个客户端断开时delete掉
-				pMsgHelper->DisconnectCallBack(sClient);
-				delete lpPerIOData;
-				lpPerIOData = NULL;
+				if (pMsgHelper && sClient < 100000)
+				{
+					pMsgHelper->DisconnectCallBack(sClient);
+				}
+				if (lpPerIOData)
+				{
+					delete lpPerIOData;
+					lpPerIOData = NULL;
+				}
 			}
 			break;
 
@@ -346,10 +351,16 @@ DWORD WINAPI CTCPNet::ClientWorkerThread(void* vParam)
 		if (SOCKET_ERROR == nNum)
 		{
 			cout << "和服务器断开连接" << endl;
-			pMsgHelper->DisconnectCallBack(0);
+			if (pMsgHelper)
+			{
+				pMsgHelper->DisconnectCallBack(0);
+			}
 			break;
 		}
-		pMsgHelper->NetMsgCallBack(0, szBuff, nLen);
+		if (pMsgHelper)
+		{
+			pMsgHelper->NetMsgCallBack(0, szBuff, nLen);
+		}
 	}
 
 	return 0;

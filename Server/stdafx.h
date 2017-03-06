@@ -22,6 +22,8 @@
 
 #include <afxdisp.h>        // MFC 自动化类
 
+// 网络连接头文件
+#include "TCPNet.h"
 
 
 #ifndef _AFX_NO_OLE_SUPPORT
