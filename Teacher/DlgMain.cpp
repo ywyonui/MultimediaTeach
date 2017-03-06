@@ -3,7 +3,7 @@
 //
 
 #include "stdafx.h"
-#include "Student.h"
+#include "Teacher.h"
 #include "afxdialogex.h"
 #include "DlgMain.h"
 

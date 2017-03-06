@@ -108,21 +108,21 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DlgMain.h" />
     <ClInclude Include="Logic\MsgHelperMain.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Teacher.h" />
-    <ClInclude Include="TeacherDlg.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DlgMain.cpp" />
     <ClCompile Include="Logic\MsgHelperMain.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Teacher.cpp" />
-    <ClCompile Include="TeacherDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Teacher.rc" />
