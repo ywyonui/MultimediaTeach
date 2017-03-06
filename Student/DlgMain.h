@@ -21,12 +21,24 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
 protected: // 控件
-	CButton m_btn_hand;
-	CButton m_btn_submit;
-	CListCtrl m_list_t;
-	CListCtrl m_list_s;
+	CButton m_btn_hand;		// 点击举手
+	CButton m_btn_submit;	// 点击提交作业
+	CButton m_btn_question;	// 点击进入问题库
+	CListCtrl m_listCtrl;
 
-	CImageList	m_imgList;
+	CImageList	m_listImage;
+
+private:
+	int		m_nBtnWidth;
+	int		m_nBtnHeight;
+
+protected:
+	// 更新列表的数据，初始化插入标题，否则插入数据
+	void UpdateList(BOOL bInitFlag);
+
+	// 调整按钮位置的通用函数
+	void MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn = FALSE);
+
 
 
 // 实现

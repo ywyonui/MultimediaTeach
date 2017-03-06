@@ -19,6 +19,33 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
 
+protected: // 控件
+	CButton m_btn_lock;			// 点击锁屏
+	CButton m_btn_show_demo;	// 点击演示
+	CButton m_btn_roll_call;	// 点击点名
+	CButton m_btn_ask;			// 点击提问
+	CButton m_btn_pen;			// 点击教鞭
+	CButton m_btn_question;		// 点击进入问题库
+	CButton m_btn_file_trans;	// 点击文件传输
+	CButton m_btn_setting;		// 点击配置
+	CListCtrl m_listCtrl;
+
+	CImageList	m_listImage;
+
+
+private:
+	int		m_nBtnWidth;
+	int		m_nBtnHeight;
+
+
+protected:
+	// 更新列表的数据，初始化插入标题，否则插入数据
+	void UpdateList(BOOL bInitFlag);
+
+	// 调整按钮位置的通用函数
+	void MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn = FALSE);
+
+
 // 实现
 protected:
 	HICON m_hIcon;
