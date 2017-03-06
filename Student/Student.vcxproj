@@ -110,7 +110,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Student.h" />
-    <ClInclude Include="StudentDlg.h" />
+    <ClInclude Include="DlgMain.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -120,7 +120,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Student.cpp" />
-    <ClCompile Include="StudentDlg.cpp" />
+    <ClCompile Include="DlgMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Student.rc" />

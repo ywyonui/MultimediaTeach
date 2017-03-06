@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "Teacher.h"
-#include "TeacherDlg.h"
+#include "DlgMain.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

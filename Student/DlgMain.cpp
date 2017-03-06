@@ -1,41 +1,41 @@
 
-// TeacherDlg.cpp : 实现文件
+// StudentDlg.cpp : 实现文件
 //
 
 #include "stdafx.h"
-#include "Teacher.h"
-#include "TeacherDlg.h"
+#include "Student.h"
 #include "afxdialogex.h"
+#include "DlgMain.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-// CTeacherDlg 对话框
+// CDlgMain 对话框
 
 
 
-CTeacherDlg::CTeacherDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(CTeacherDlg::IDD, pParent)
+CDlgMain::CDlgMain(CWnd* pParent /*=NULL*/)
+	: CDialogEx(CDlgMain::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
-void CTeacherDlg::DoDataExchange(CDataExchange* pDX)
+void CDlgMain::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CTeacherDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(CDlgMain, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 END_MESSAGE_MAP()
 
 
-// CTeacherDlg 消息处理程序
+// CDlgMain 消息处理程序
 
-BOOL CTeacherDlg::OnInitDialog()
+BOOL CDlgMain::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
@@ -53,7 +53,7 @@ BOOL CTeacherDlg::OnInitDialog()
 //  来绘制该图标。  对于使用文档/视图模型的 MFC 应用程序，
 //  这将由框架自动完成。
 
-void CTeacherDlg::OnPaint()
+void CDlgMain::OnPaint()
 {
 	if (IsIconic())
 	{
@@ -80,7 +80,7 @@ void CTeacherDlg::OnPaint()
 
 //当用户拖动最小化窗口时系统调用此函数取得光标
 //显示。
-HCURSOR CTeacherDlg::OnQueryDragIcon()
+HCURSOR CDlgMain::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }

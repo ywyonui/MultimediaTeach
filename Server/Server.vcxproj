@@ -134,4 +134,9 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="Server.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

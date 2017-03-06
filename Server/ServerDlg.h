@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "afxwin.h"
 
 
 // CServerDlg 对话框
@@ -18,6 +19,11 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
+protected:
+	CStatic m_static_t;
+	CStatic m_static_s;
+	CEdit m_edit_t;
+	CEdit m_edit_s;
 
 // 实现
 protected:
@@ -26,6 +32,8 @@ protected:
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+
 };

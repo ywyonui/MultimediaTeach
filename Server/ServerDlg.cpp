@@ -25,11 +25,16 @@ CServerDlg::CServerDlg(CWnd* pParent /*=NULL*/)
 void CServerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_STATIC_T, m_static_t);
+	DDX_Control(pDX, IDC_STATIC_S, m_static_s);
+	DDX_Control(pDX, IDC_EDIT_T, m_edit_t);
+	DDX_Control(pDX, IDC_EDIT_S, m_edit_s);
 }
 
 BEGIN_MESSAGE_MAP(CServerDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -45,6 +50,11 @@ BOOL CServerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
+	int nSW = GetSystemMetrics(SM_CXSCREEN);
+	int nSH = GetSystemMetrics(SM_CYSCREEN);
+
+	MoveWindow(static_cast<int>(nSW * 0.1), static_cast<int>(nSH * 0.1), static_cast<int>(nSW * 0.8), static_cast<int>(nSH * 0.8));
+
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -85,3 +95,30 @@ HCURSOR CServerDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CServerDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+
+	// TODO:  在此处添加消息处理程序代码
+	int nW = static_cast<int>((cx - 60) / 2);
+	int nH = cy - 70;
+
+	if (m_static_t.GetSafeHwnd())
+	{
+		m_static_t.MoveWindow(20, 20, 150, 30);
+	}
+	if (m_static_s.GetSafeHwnd())
+	{
+		m_static_s.MoveWindow(40 + nW, 20, 150, 30);
+	}
+	if (m_edit_t.GetSafeHwnd())
+	{
+		m_edit_t.MoveWindow(20, 50, nW, nH);
+	}
+	if (m_edit_s.GetSafeHwnd())
+	{
+		m_edit_s.MoveWindow(40 + nW, 50, nW, nH);
+	}
+}

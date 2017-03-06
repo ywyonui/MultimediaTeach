@@ -1,19 +1,19 @@
 
-// TeacherDlg.h : 头文件
+// StudentDlg.h : 头文件
 //
 
 #pragma once
 
 
-// CTeacherDlg 对话框
-class CTeacherDlg : public CDialogEx
+// CDlgMain 对话框
+class CDlgMain : public CDialogEx
 {
 // 构造
 public:
-	CTeacherDlg(CWnd* pParent = NULL);	// 标准构造函数
+	CDlgMain(CWnd* pParent = NULL);	// 标准构造函数
 
 // 对话框数据
-	enum { IDD = IDD_TEACHER_DIALOG };
+	enum { IDD = IDD_DLG_MAIN };
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持

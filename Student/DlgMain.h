@@ -5,15 +5,15 @@
 #pragma once
 
 
-// CStudentDlg 对话框
-class CStudentDlg : public CDialogEx
+// CDlgMain 对话框
+class CDlgMain : public CDialogEx
 {
 // 构造
 public:
-	CStudentDlg(CWnd* pParent = NULL);	// 标准构造函数
+	CDlgMain(CWnd* pParent = NULL);	// 标准构造函数
 
 // 对话框数据
-	enum { IDD = IDD_STUDENT_DIALOG };
+	enum { IDD = IDD_DLG_MAIN };
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
