@@ -84,6 +84,7 @@
   <ItemGroup>
     <ClInclude Include="BLL\BaseBLL.h" />
     <ClInclude Include="BLL\define\EnumType.h" />
+    <ClInclude Include="BLL\define\EUIMsg.h" />
     <ClInclude Include="BLL\define\MsgInfo.h" />
     <ClInclude Include="BLL\define\UserInfo.h" />
     <ClInclude Include="BLL\UserMgr.h" />

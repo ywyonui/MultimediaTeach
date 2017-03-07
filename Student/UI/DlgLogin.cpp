@@ -1,17 +1,15 @@
 // DlgLogin.cpp : 实现文件
 //
-
 #include "stdafx.h"
-#include "GameClient.h"
-#include "DlgLogin.h"
+#include "Student.h"
 #include "afxdialogex.h"
-
-#include <string>
-#include "MsgHelperClient.h"
-
+#include "DlgLogin.h"
 #include "DlgReg.h"
 
-#include "ClientDefine.h"
+#include "Logic/MsgHelperMain.h"
+#include "BLL/define/MsgInfo.h"
+
+#include <string>
 
 // CDlgLogin 对话框
 

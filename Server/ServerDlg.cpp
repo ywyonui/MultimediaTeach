@@ -10,7 +10,7 @@
 #include <string>
 
 #include "Logic/MsgHelperMain.h"
-#include "BLL/UserMgr.h"
+#include "DataBase/DBMySQL.h"
 
 
 #ifdef _DEBUG
@@ -66,7 +66,7 @@ BOOL CServerDlg::OnInitDialog()
 	
 	std::string strReturn = "";
 	// 连接数据库
-	if (!CUserMgr::GetInstance().ConnMySQL("192.168.18.100", 3306, "multimediateach", "test", "123456", "UTF-16", strReturn))
+	if (!CDBMySQL::GetInstance().ConnMySQL("192.168.18.100", 3306, "multimediateach", "test", "123456", "UTF-16", strReturn))
 	{
 		m_edit_me.SetWindowText(_T("数据库连接成功"));
 	}
@@ -78,6 +78,7 @@ BOOL CServerDlg::OnInitDialog()
 	}
 	
 	CMsgHelperMain& msgHelper = CMsgHelperMain::GetInstance();
+	msgHelper.SetHwnd(this->GetSafeHwnd());
 
 	CString str;
 	m_edit_me.GetWindowText(str);
@@ -184,5 +185,5 @@ void CServerDlg::OnDestroy()
 	// TODO:  在此处添加消息处理程序代码
 
 	// 断开数据库连接
-	CUserMgr::GetInstance().DisConnMySQL();
+	CDBMySQL::GetInstance().DisConnMySQL();
 }

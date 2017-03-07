@@ -5,6 +5,10 @@
 #include "stdafx.h"
 #include "Student.h"
 #include "DlgMain.h"
+#include "UI/DlgLogin.h"
+
+#include "TCPNet.h"
+#include "Logic/MsgHelperMain.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,24 +74,37 @@ BOOL CStudentApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-	CDlgMain dlg;
-	m_pMainWnd = &dlg;
-	INT_PTR nResponse = dlg.DoModal();
-	if (nResponse == IDOK)
+	SetRegistryKey(_T("斗地主客户端"));
+
+	// 1、初始化网络
+	// 初始化消息处理类的数据
+	CMsgHelperMain& msgHelper = CMsgHelperMain::GetInstance();
+
+	if (!CTCPNet::GetInstance().InitNet(1234, &msgHelper, false, "127.0.0.1"))
+		// if (!InitNet(1234, NetMsgCallBack, false, "192.168.18.100"))
 	{
-		// TODO:  在此放置处理何时用
-		//  “确定”来关闭对话框的代码
+		AfxMessageBox(_T("连接服务器失败"));
+		return FALSE;
 	}
-	else if (nResponse == IDCANCEL)
+
 	{
-		// TODO:  在此放置处理何时用
-		//  “取消”来关闭对话框的代码
+		CDlgLogin dlgLogin;
+		if (dlgLogin.DoModal() != IDOK)
+		{
+			return FALSE;
+		}
+
+		{	// 主程序
+			CDlgMain dlg;
+			m_pMainWnd = &dlg;
+
+			if (dlg.DoModal() == IDOK)
+			{
+
+			}
+		}
 	}
-	else if (nResponse == -1)
-	{
-		TRACE(traceAppMsg, 0, "警告: 对话框创建失败，应用程序将意外终止。\n");
-		TRACE(traceAppMsg, 0, "警告: 如果您在对话框上使用 MFC 控件，则无法 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS。\n");
-	}
+
 
 	// 删除上面创建的 shell 管理器。
 	if (pShellManager != NULL)

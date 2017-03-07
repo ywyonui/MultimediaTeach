@@ -12,7 +12,6 @@
 #pragma region 自定义消息
 enum EClientMessage
 {
-	EWND_MSG_LOGIN = WM_USER + 10001,	// 登陆消息，WPARAM是登陆成功后返回的数据
-
+	EWND_MSG_LOGIN_SUCCESS = WM_USER + 10001,	// 登陆成功后的返回消息，WPARAM是登陆成功后返回的数据
 };
 #pragma endregion 自定义消息

@@ -139,8 +139,8 @@ bool CDBMySQL::UpdateData(const std::string& strSQL, std::string& strReturnMsg)
 /*************************************************************
 函数名称:	SelectData
 参数说明:	strSQL:					SQ语句
-			nCol:					查询的字段数量
 			vecResData（OUT）:		查询出来的所有数据都以字符串的形式返回
+			nCol:					查询的字段数量
 			strReturnMsg（OUT）:	返回连接信息
 返 回 值:	bool:	是否查询到数据了
 功能说明:	查询数据库

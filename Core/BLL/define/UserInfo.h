@@ -44,31 +44,3 @@ struct ST_RegUserInfo
 		memset(strUserPwd, 0, 30);
 	}
 };
-
-/**
-	类    型 :	用户显示信息
-	功能说明 :	用户名、昵称、金币等。。。
-*/
-struct ST_ShowUserInfo
-{
-	int		nUserID;			//	用户ID
-	char	strUserName[30];	//	用户名
-	char	strPetName[50];		//	昵称
-	int		nMoney;				//	金币
-	int		nIndexDesk;			//  桌子号
-	int		nIndexSeat;			//  座位号
-	long	nSocketID;			//	记录当前客户端的SocketID，登陆的时候保存
-
-	ST_ShowUserInfo()
-	{
-		nUserID = 0;
-		memset(strUserName, 0, 30);
-		memset(strPetName, 0, 50);
-		nMoney = 0;
-		nIndexDesk = -1;
-		nIndexSeat = 0;
-		nSocketID = 0;
-	}
-};
-
-

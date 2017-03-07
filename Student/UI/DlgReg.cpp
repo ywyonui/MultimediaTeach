@@ -2,12 +2,13 @@
 //
 
 #include "stdafx.h"
-#include "GameClient.h"
+#include "Student.h"
 #include "DlgReg.h"
 #include "afxdialogex.h"
 
-#include "MsgInfo.h"
-#include "MsgHelperClient.h"
+#include "Logic/MsgHelperMain.h"
+#include "BLL/define/MsgInfo.h"
+
 
 // CDlgReg ¶Ô»°¿ò
 

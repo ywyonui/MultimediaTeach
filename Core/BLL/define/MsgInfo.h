@@ -17,6 +17,7 @@
 struct ST_MsgHead
 {
 	EMsgType msgType;
+	EClientType	clientType;
 };
 
 /**
@@ -27,7 +28,6 @@ struct ST_MsgLogin
 {
 	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
 	ST_LoginUserInfo stLoginInfo;	// 登陆时录入的用户信息
-
 
 	ST_MsgLogin()
 	{
@@ -44,8 +44,7 @@ struct ST_MsgLoginResult
 {
 	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
 	bool		bSuccess;	// 是否登陆成功
-	ST_ShowUserInfo	stShowUserInfo;	// 用于显示的用户信息
-
+	
 	ST_MsgLoginResult()
 	{
 		stMsgHead.msgType = eLoginResult;
@@ -87,19 +86,6 @@ struct ST_MsgRegResult
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
-类    型 :	加入游戏
-功能说明 :
-*/
-struct ST_MsgEnterGame
-{
-	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
-	ST_ShowUserInfo stShowUserInfo;	// 当前用户的信息
 
-	ST_MsgEnterGame()
-	{
-		stMsgHead.msgType = eEnterGame;
-	}
-};
 
 

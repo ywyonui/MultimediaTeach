@@ -54,6 +54,9 @@
     <ClInclude Include="BLL\define\UserInfo.h">
       <Filter>BLL\define</Filter>
     </ClInclude>
+    <ClInclude Include="BLL\define\EUIMsg.h">
+      <Filter>BLL\define</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
