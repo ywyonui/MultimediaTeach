@@ -48,7 +48,7 @@ public:
 	返 回 值:	bool :	是否成功
 	功能说明:	注册用户
 	*************************************************************/
-	bool RegUser(const ST_RegUserInfo& stRegUserInfo);
+	bool RegUser(const ST_RegUserInfo& stRegUserInfo, const EClientType& eType);
 
 	/*************************************************************
 	函数名称:	Login

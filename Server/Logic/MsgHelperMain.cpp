@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "MsgHelperMain.h"
 
+#include "BLL/UserMgr.h"
+
 #include <iostream>
 using namespace std;
 
@@ -40,7 +42,33 @@ CMsgHelperMain& CMsgHelperMain::GetInstance(void)
 *************************************************************/
 void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 {
-	
+	ST_MsgHead stHead;
+	memcpy(&stHead, vParam, sizeof(ST_MsgHead));
+
+	switch (stHead.msgType)
+	{
+	case eReg:
+	{
+		ST_MsgReg msg;
+		memcpy(&msg, vParam, sizeof(ST_MsgReg));
+		ST_MsgRegResult msgRes;
+		msgRes.bSuccess = CUserMgr::GetInstance().RegUser(msg.stRegInfo, stHead.clientType);
+		CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgRegResult));
+	}
+	break;
+	case eLogin:	// µÇÂ½ÏûÏ¢
+	{
+		ST_MsgLogin msg;
+		memcpy(&msg, vParam, sizeof(ST_MsgLogin));
+		ST_MsgLoginResult msgRes;
+		msgRes.bSuccess = CUserMgr::GetInstance().Login(msg.stLoginInfo);
+		CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgLoginResult));
+	}
+	break;
+
+	default:
+		break;
+	}
 }
 
 /*************************************************************

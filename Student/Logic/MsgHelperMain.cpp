@@ -1,6 +1,12 @@
 #include "stdafx.h"
 #include "MsgHelperMain.h"
 
+#include "BLL/define/MsgInfo.h"
+#include "BLL/define/UserInfo.h"
+#include "BLL/define/EUIMsg.h"
+
+#include <windows.h>
+
 #include <iostream>
 using namespace std;
 
@@ -40,7 +46,40 @@ CMsgHelperMain& CMsgHelperMain::GetInstance(void)
 *************************************************************/
 void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 {
-	
+	ST_MsgHead stHead;
+	memcpy(&stHead, vParam, sizeof(ST_MsgHead));
+	switch (stHead.msgType)
+	{
+	case eRegResult:	// µÇÂ½·µ»ØÏûÏ¢
+	{
+		ST_MsgRegResult msg;
+		memcpy(&msg, vParam, sizeof(ST_MsgRegResult));
+		if (msg.bSuccess)
+		{
+			SendMessage(m_hWnd, WM_COMMAND, IDOK, 0);
+		}
+		else
+		{
+			AfxMessageBox(_T("×¢²áÊ§°Ü£¬ÕËºÅÒÑ¾­´æÔÚ"));
+		}
+	}
+	break;
+	case eLoginResult:	// µÇÂ½·µ»ØÏûÏ¢
+	{
+		ST_MsgLoginResult msg;
+		memcpy(&msg, vParam, sizeof(ST_MsgLoginResult));
+		if (msg.bSuccess)
+		{
+		//	SendMessage(m_hWnd, EWND_MSG_LOGIN, (DWORD)&msg.stShowUserInfo, 0);
+			SendMessage(m_hWnd, EWND_MSG_LOGIN_SUCCESS, 0, 0);
+		}
+		else
+		{
+			AfxMessageBox(_T("µÇÂ½Ê§°Ü£¬ÕËºÅ»òÃÜÂë´íÎó"));
+		}
+	}
+	break;
+	}
 }
 
 /*************************************************************

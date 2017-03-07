@@ -33,7 +33,7 @@ CUserMgr& CUserMgr::GetInstance()
 返 回 值:	bool :	是否成功
 功能说明:	注册用户
 *************************************************************/
-bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo)
+bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const EClientType& eType)
 {
 	char pStrSQL[1024] = { 0 };
 
@@ -54,8 +54,8 @@ bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo)
 		return false;
 	}
 	
-	sprintf_s(pStrSQL, "insert into user(UserName, UserPetName, UserPwd) values(\"%s\", \"%s\", md5(\"%s\") );", 
-			  stRegUserInfo.strUserName, stRegUserInfo.strPetName, stRegUserInfo.strUserPwd);
+	sprintf_s(pStrSQL, "insert into user(UserName, UserPetName, UserPwd, UserType) values(\"%s\", \"%s\", md5(\"%s\"), %d );", 
+			  stRegUserInfo.strUserName, stRegUserInfo.strPetName, stRegUserInfo.strUserPwd, eType);
 
 	std::string strReturn = "";
 
