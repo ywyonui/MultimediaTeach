@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "Server.h"
 #include "ServerDlg.h"
-#include "afxdialogex.h"
 
 #include <string>
 

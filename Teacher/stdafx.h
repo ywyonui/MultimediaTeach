@@ -22,7 +22,11 @@
 
 #include <afxdisp.h>        // MFC 自动化类
 
+#include "afxdialogex.h"
 
+
+// 网络连接头文件
+#include "TCPNet.h"
 
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>           // MFC 对 Internet Explorer 4 公共控件的支持

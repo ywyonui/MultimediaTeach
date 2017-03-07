@@ -8,14 +8,13 @@
 **/
 /***************************************************************************************/
 
-#include <mysql.h>
 #include <vector>
 
 /**	
 	类    型 :	
 	功能说明 :	
 */
-class CDBMySQL
+class __declspec(dllexport) CDBMySQL
 {
 private:
 	CDBMySQL();
@@ -29,7 +28,10 @@ public:
 
 #pragma region 私有变量
 private:
-	MYSQL	m_MySQL;	// MySQL数据库对象
+	class Imp;
+	Imp* m_pImp;
+
+
 #pragma endregion 私有变量
 
 

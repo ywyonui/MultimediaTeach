@@ -12,14 +12,39 @@
 
 #include "DBMySQL.h"
 
+#include <mysql.h>
+
+#pragma region Imp
+class CDBMySQL::Imp
+{
+public:
+	Imp()
+	{
+
+	}
+	~Imp()
+	{
+
+	}
+
+public:
+	MYSQL	m_MySQL;	// MySQL数据库对象
+};
+#pragma endregion Imp
 
 CDBMySQL::CDBMySQL()
 {
+	m_pImp = new Imp;
 }
 
 
 CDBMySQL::~CDBMySQL()
 {
+	if (m_pImp)
+	{
+		delete m_pImp;
+		m_pImp = NULL;
+	}
 }
 
 #pragma region 公共接口
@@ -50,19 +75,20 @@ int CDBMySQL::ConnMySQL(const std::string& strIP, const int& nPort, const std::s
 	const std::string& strUserName, const std::string& strUserPwd, const std::string& strCharSet,
 	std::string& strReturnMsg)
 {
-	if (mysql_init(&m_MySQL) == NULL)
+	MYSQL& mySQL = m_pImp->m_MySQL;
+	if (mysql_init(&mySQL) == NULL)
 	{
 		strReturnMsg = "inital mysql handle error";
 		return 1;
 	}
 
-	if (mysql_real_connect(&m_MySQL, strIP.c_str(), strUserName.c_str(), strUserPwd.c_str(), strDBName.c_str(), nPort, NULL, 0) == NULL)
+	if (mysql_real_connect(&mySQL, strIP.c_str(), strUserName.c_str(), strUserPwd.c_str(), strDBName.c_str(), nPort, NULL, 0) == NULL)
 	{
 		strReturnMsg = "Failed to connect to database: Error";
 		return 1;
 	}
 
-	if (mysql_set_character_set(&m_MySQL, strCharSet.c_str()) == NULL)
+	if (mysql_set_character_set(&mySQL, strCharSet.c_str()) == NULL)
 	{
 		strReturnMsg = "mysql_set_character_set Error";
 		return 1;
@@ -79,7 +105,8 @@ int CDBMySQL::ConnMySQL(const std::string& strIP, const int& nPort, const std::s
 *************************************************************/
 void CDBMySQL::DisConnMySQL()
 {
-	mysql_close(&m_MySQL);
+	MYSQL& mySQL = m_pImp->m_MySQL;
+	mysql_close(&mySQL);
 }
 
 /*************************************************************
@@ -91,7 +118,8 @@ void CDBMySQL::DisConnMySQL()
 *************************************************************/
 bool CDBMySQL::InsertData(const std::string& strSQL, std::string& strReturnMsg)
 {
-	if (mysql_query(&m_MySQL, strSQL.c_str()) != 0)
+	MYSQL& mySQL = m_pImp->m_MySQL;
+	if (mysql_query(&mySQL, strSQL.c_str()) != 0)
 	{
 		strReturnMsg = "Insert Data Error";
 		return false;
@@ -109,7 +137,8 @@ bool CDBMySQL::InsertData(const std::string& strSQL, std::string& strReturnMsg)
 *************************************************************/
 bool CDBMySQL::DelData(const std::string& strSQL, std::string& strReturnMsg)
 {
-	if (mysql_query(&m_MySQL, strSQL.c_str()) != 0)
+	MYSQL& mySQL = m_pImp->m_MySQL;
+	if (mysql_query(&mySQL, strSQL.c_str()) != 0)
 	{
 		strReturnMsg = "Del Data Error";
 		return false;
@@ -127,7 +156,8 @@ bool CDBMySQL::DelData(const std::string& strSQL, std::string& strReturnMsg)
 *************************************************************/
 bool CDBMySQL::UpdateData(const std::string& strSQL, std::string& strReturnMsg)
 {
-	if (mysql_query(&m_MySQL, strSQL.c_str()) != 0)
+	MYSQL& mySQL = m_pImp->m_MySQL;
+	if (mysql_query(&mySQL, strSQL.c_str()) != 0)
 	{
 		strReturnMsg = "Update Data Error";
 		return false;
@@ -150,12 +180,13 @@ bool CDBMySQL::SelectData(const std::string& strSQL, std::vector<std::string>& v
 	MYSQL_ROW mRow;
 	MYSQL_RES *mRes;
 
-	if (mysql_query(&m_MySQL, strSQL.c_str()) != 0)
+	MYSQL& mySQL = m_pImp->m_MySQL;
+	if (mysql_query(&mySQL, strSQL.c_str()) != 0)
 	{
 		strReturnMsg = "select ps_info Error";
 		return false;
 	}
-	mRes = mysql_store_result(&m_MySQL);
+	mRes = mysql_store_result(&mySQL);
 
 	if (mRes == NULL)
 	{
