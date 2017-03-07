@@ -106,6 +106,7 @@ void CDlgReg::OnRegUser()
 	CStringA strPwdA(strPwd);
 	
 	ST_MsgReg msg;
+	msg.stMsgHead.clientType = eStudent;
 
 	memcpy(msg.stRegInfo.strUserName, strNameA.GetBuffer(), strNameA.GetLength());
 	memcpy(msg.stRegInfo.strPetName, strPetNameA.GetBuffer(), strPetNameA.GetLength());

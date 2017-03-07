@@ -69,11 +69,11 @@ bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const EClientType& e
 返 回 值:	bool :	是否成功
 功能说明:	登陆
 *************************************************************/
-bool CUserMgr::Login(const ST_LoginUserInfo& stLoginUserInfo)
+bool CUserMgr::Login(const ST_LoginUserInfo& stLoginUserInfo, const EClientType& eType)
 {
 	char pStrSQL[1024] = { 0 };
-	sprintf_s(pStrSQL, "select * from user where UserName = \"%s\" and UserPwd = md5(\"%s\");",
-			  stLoginUserInfo.strUserName, stLoginUserInfo.strUserPwd);
+	sprintf_s(pStrSQL, "select * from user where UserName = \"%s\" and UserPwd = md5(\"%s\") and UserType = %d;",
+			  stLoginUserInfo.strUserName, stLoginUserInfo.strUserPwd, eType);
 
 	std::string strReturnMsg = "";
 
@@ -81,7 +81,7 @@ bool CUserMgr::Login(const ST_LoginUserInfo& stLoginUserInfo)
 
 	bool bSuccess = CDBMySQL::GetInstance().SelectData(pStrSQL, vecResData, 5, strReturnMsg);
 
-	if (!bSuccess)
+	if (!bSuccess || !vecResData.size())
 	{
 		return false;
 	}

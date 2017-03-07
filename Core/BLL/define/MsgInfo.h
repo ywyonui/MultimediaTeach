@@ -18,6 +18,12 @@ struct ST_MsgHead
 {
 	EMsgType msgType;
 	EClientType	clientType;
+
+	ST_MsgHead()
+	{
+		msgType = eLogin;
+		clientType = eStudent;
+	}
 };
 
 /**

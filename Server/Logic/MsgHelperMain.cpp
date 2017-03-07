@@ -52,6 +52,8 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		ST_MsgReg msg;
 		memcpy(&msg, vParam, sizeof(ST_MsgReg));
 		ST_MsgRegResult msgRes;
+		msgRes.stMsgHead.msgType = eRegResult;
+		msgRes.stMsgHead.clientType = stHead.clientType;
 		msgRes.bSuccess = CUserMgr::GetInstance().RegUser(msg.stRegInfo, stHead.clientType);
 		CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgRegResult));
 	}
@@ -61,7 +63,10 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		ST_MsgLogin msg;
 		memcpy(&msg, vParam, sizeof(ST_MsgLogin));
 		ST_MsgLoginResult msgRes;
-		msgRes.bSuccess = CUserMgr::GetInstance().Login(msg.stLoginInfo);
+		msgRes.stMsgHead.msgType = eLoginResult;
+		msgRes.stMsgHead.clientType = stHead.clientType;
+		msgRes.bSuccess = CUserMgr::GetInstance().Login(msg.stLoginInfo, stHead.clientType);
+
 		CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgLoginResult));
 	}
 	break;

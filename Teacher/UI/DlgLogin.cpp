@@ -1,17 +1,17 @@
 // DlgLogin.cpp : 实现文件
 //
-
 #include "stdafx.h"
-#include "GameClient.h"
-#include "DlgLogin.h"
+#include "Teacher.h"
 #include "afxdialogex.h"
-
-#include <string>
-#include "MsgHelperClient.h"
-
+#include "DlgLogin.h"
 #include "DlgReg.h"
 
-#include "ClientDefine.h"
+#include "Logic/MsgHelperMain.h"
+
+#include "BLL/define/EUIMsg.h"
+
+
+#include <string>
 
 // CDlgLogin 对话框
 
@@ -27,14 +27,6 @@ CDlgLogin::~CDlgLogin()
 {
 }
 
-/*************************************************************
-功能说明:	返回登陆成功之后的用户信息的引用
-*************************************************************/
-ST_ShowUserInfo& CDlgLogin::GetShowUserInfo()
-{
-	return m_stShowUserInfo;
-}
-
 void CDlgLogin::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -44,7 +36,7 @@ void CDlgLogin::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlgLogin, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_LOGIN, &CDlgLogin::OnLogin)
 	ON_BN_CLICKED(IDC_BTN_REG, &CDlgLogin::OnRegUser)
-	ON_MESSAGE(EWND_MSG_LOGIN, &CDlgLogin::OnWndMsgLogin)
+	ON_MESSAGE(EWND_MSG_LOGIN_SUCCESS, &CDlgLogin::OnWndMsgLogin)
 END_MESSAGE_MAP()
 
 
@@ -81,7 +73,7 @@ void CDlgLogin::OnLogin()
 	}
 	
 	// 准备将数据传给服务器进行判断
-	CMsgHelperClient& msgHelper = CMsgHelperClient::GetInstance();
+	CMsgHelperMain& msgHelper = CMsgHelperMain::GetInstance();
 
 	// 1、将当前窗口句柄交给消息处理器，用于接收消息
 	msgHelper.SetHwnd(this->GetSafeHwnd());
@@ -113,10 +105,6 @@ void CDlgLogin::OnRegUser()
 
 LRESULT CDlgLogin::OnWndMsgLogin(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam)
-	{
-		memcpy(&m_stShowUserInfo, (void*)wParam, sizeof(ST_ShowUserInfo));
-	}
 	CDialogEx::OnOK();
 	return 0;
 }

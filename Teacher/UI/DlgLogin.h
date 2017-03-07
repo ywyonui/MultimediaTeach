@@ -7,7 +7,7 @@
 	功能说明:	登陆界面
 **/
 /***************************************************************************************/
-#include "MsgInfo.h"
+#include "BLL/define/MsgInfo.h"
 
 
 class CDlgLogin : public CDialogEx
@@ -22,13 +22,11 @@ public:
 	enum { IDD = IDD_DLG_LOGIN };
 
 private:
-	ST_ShowUserInfo m_stShowUserInfo;
 
 public:
 	/*************************************************************
 	功能说明:	返回登陆成功之后的用户信息的引用
 	*************************************************************/
-	ST_ShowUserInfo& GetShowUserInfo();
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持

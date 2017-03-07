@@ -7,7 +7,6 @@
 #include "DlgMain.h"
 #include "UI/DlgLogin.h"
 
-#include "TCPNet.h"
 #include "Logic/MsgHelperMain.h"
 
 #ifdef _DEBUG

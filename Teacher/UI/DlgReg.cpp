@@ -2,12 +2,13 @@
 //
 
 #include "stdafx.h"
-#include "GameClient.h"
+#include "Teacher.h"
 #include "DlgReg.h"
 #include "afxdialogex.h"
 
-#include "MsgInfo.h"
-#include "MsgHelperClient.h"
+#include "Logic/MsgHelperMain.h"
+#include "BLL/define/MsgInfo.h"
+
 
 // CDlgReg 对话框
 
@@ -94,7 +95,7 @@ void CDlgReg::OnRegUser()
 	}
 
 	// 准备将数据传给服务器进行判断
-	CMsgHelperClient& msgHelper = CMsgHelperClient::GetInstance();
+	CMsgHelperMain& msgHelper = CMsgHelperMain::GetInstance();
 
 	// 1、将当前窗口句柄交给消息处理器，用于接收消息
 	msgHelper.SetHwnd(this->GetSafeHwnd());
@@ -105,6 +106,7 @@ void CDlgReg::OnRegUser()
 	CStringA strPwdA(strPwd);
 	
 	ST_MsgReg msg;
+	msg.stMsgHead.clientType = eTeacher;
 
 	memcpy(msg.stRegInfo.strUserName, strNameA.GetBuffer(), strNameA.GetLength());
 	memcpy(msg.stRegInfo.strPetName, strPetNameA.GetBuffer(), strPetNameA.GetLength());

@@ -42,6 +42,12 @@
     <ClInclude Include="DlgMain.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="UI\DlgLogin.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\DlgReg.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Teacher.cpp">
@@ -55,6 +61,12 @@
     </ClCompile>
     <ClCompile Include="DlgMain.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\DlgLogin.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\DlgReg.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

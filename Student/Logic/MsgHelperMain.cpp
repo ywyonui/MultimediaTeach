@@ -75,7 +75,7 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		}
 		else
 		{
-			AfxMessageBox(_T("登陆失败，账号或密码错误"));
+			AfxMessageBox(_T("登陆失败，账号或密码或者类型错误"));
 		}
 	}
 	break;
