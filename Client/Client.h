@@ -20,16 +20,7 @@ class CClientApp : public CWinApp
 public:
 	CClientApp();
 
-	enum EAPPType 
-	{
-		eTeacher = 1,
-		eStudent = 2
-	};
-
 public:
-	EAPPType	m_appClientType;
-
-	static CString GetModulePath();
 
 // ÖØÐ´
 public:

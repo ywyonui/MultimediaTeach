@@ -5,6 +5,10 @@
 #include "stdafx.h"
 #include "Client.h"
 #include "DlgMain.h"
+#include "UI/DlgLogin.h"
+
+#include "Logic/MsgHelperMain.h"
+#include "BLL/define/EnumType.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,8 +35,7 @@ CClientApp::CClientApp()
 
 CClientApp theApp;
 
-
-CString CClientApp::GetModulePath()
+CString GetModulePath()
 {
 	CString    sPath;
 	GetModuleFileName(NULL, sPath.GetBufferSetLength(MAX_PATH + 1), MAX_PATH);
@@ -43,6 +46,11 @@ CString CClientApp::GetModulePath()
 	return    sPath;
 }
 
+CString GetConfigPath()
+{
+	return GetModulePath() + _T("\\..\\config.ini");
+}
+
 // CClientApp 初始化
 
 BOOL CClientApp::InitInstance()
@@ -51,14 +59,43 @@ BOOL CClientApp::InitInstance()
 
 	SetRegistryKey(_T("多媒体教学演示系统"));
 
-	CFileFind finder;   //查找是否存在ini文件，若不存在，则生成一个新的默认设置的ini文件，这样就保证了我们更改后的设置每次都可用    
-	CString strConfigPath = GetModulePath();
-	strConfigPath += _T("\\..\\config.ini");
+	// 获取配置信息用于数据初始化
+	CString strConfigPath = GetConfigPath();
+	CStringA strIPA = "";
+	CString strIP = _T("");
+	int nPort = 0;
+	EClientType appClientType = (EClientType)GetPrivateProfileInt(_T("Client"), _T("Type"), 0, strConfigPath);
+	GetPrivateProfileString(_T("Server"), _T("IP"), _T("127.0.0.1"), strIP.GetBuffer(), MAX_PATH, strConfigPath);
+	strIPA = strIP;
+	nPort = GetPrivateProfileInt(_T("Server"), _T("Port"), 0, strConfigPath);
 
-	WritePrivateProfileString(_T("Client"), _T("Type"), _T("1"), strConfigPath);
-	WritePrivateProfileString(_T("Server"), _T("IP"), _T("1"), strConfigPath);
-	WritePrivateProfileString(_T("Server"), _T("Port"), _T("1"), strConfigPath);
+	// 1、初始化网络
+	// 初始化消息处理类的数据
+	CMsgHelperMain& msgHelper = CMsgHelperMain::GetInstance();
 
+	if (!CTCPNet::GetInstance().InitNet(nPort, &msgHelper, false, strIPA.GetBuffer()))
+	{
+		AfxMessageBox(_T("连接服务器失败"));
+		return FALSE;
+	}
+
+	{
+		CDlgLogin dlgLogin;
+		if (dlgLogin.DoModal() != IDOK)
+		{
+		}
+		else
+		{	// 主程序
+			CDlgMain dlg;
+			dlg.SetClientType(appClientType);
+			m_pMainWnd = (CWnd*)&dlg;
+
+			if (dlg.DoModal() == IDOK)
+			{
+
+			}
+		}
+	}
 
 	return FALSE;
 }

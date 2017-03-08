@@ -74,7 +74,7 @@
     <PostBuildEvent>
       <Command>xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Net\Net.dll" "$(OutDir)"
 xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"
-xcopy /d /e /y "$(SolutionDir)data" "$(OutDir)"
+xcopy /d /e /y "$(SolutionDir)data" "$(OutDir)..\"
 xcopy /d /e /y "$(SolutionDir)Core\DataBase\libmysql.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
