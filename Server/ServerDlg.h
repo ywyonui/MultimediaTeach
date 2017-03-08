@@ -39,4 +39,5 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	afx_msg void OnDestroy();
+	afx_msg LRESULT OnMsgServerRecv(WPARAM wParam, LPARAM lParam);
 };

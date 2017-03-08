@@ -10,6 +10,8 @@
 
 #include "Logic/MsgHelperMain.h"
 #include "DataBase/DBMySQL.h"
+#include "BLL/define/MsgInfo.h"
+#include "BLL/define/EUIMsg.h"
 
 
 #ifdef _DEBUG
@@ -43,6 +45,7 @@ BEGIN_MESSAGE_MAP(CServerDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
+	ON_MESSAGE(EWND_MSG_SERVER_RECV, &CServerDlg::OnMsgServerRecv)
 END_MESSAGE_MAP()
 
 
@@ -185,4 +188,26 @@ void CServerDlg::OnDestroy()
 
 	// 断开数据库连接
 	CDBMySQL::GetInstance().DisConnMySQL();
+}
+
+
+afx_msg LRESULT CServerDlg::OnMsgServerRecv(WPARAM wParam, LPARAM lParam)
+{
+	ST_MsgHead* pHead = (ST_MsgHead*)wParam;
+	CWnd* pWnd = &m_edit_t;
+	if (pHead->clientType == eStudent)
+	{
+		pWnd = &m_edit_s;
+	}
+
+	CString str;
+	pWnd->GetWindowText(str);
+	if (!str.IsEmpty())
+	{
+		str += _T("\r\n");
+	}
+	CStringA strA(((std::string*)lParam)->c_str());
+	str += strA;
+	pWnd->SetWindowText(str);
+	return 0;
 }

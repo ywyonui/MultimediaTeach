@@ -83,6 +83,7 @@ void CDlgLogin::OnLogin()
 	CStringA strPwdA(strPwd);
 
 	ST_MsgLogin msg;
+	msg.stMsgHead.clientType = eTeacher;
 
 	memcpy(msg.stLoginInfo.strUserName, strNameA.GetBuffer(), strNameA.GetLength());
 	memcpy(msg.stLoginInfo.strUserPwd, strPwdA.GetBuffer(), strPwdA.GetLength());

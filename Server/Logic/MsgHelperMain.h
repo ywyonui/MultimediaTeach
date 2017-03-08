@@ -27,8 +27,10 @@ public:
 
 
 #pragma region 私有变量
+	class Imp;
 private:
 	HWND	m_hWnd;
+	Imp*	m_pImp;
 #pragma endregion 私有变量
 
 
