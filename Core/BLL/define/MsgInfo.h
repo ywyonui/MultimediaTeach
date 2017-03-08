@@ -27,6 +27,18 @@ struct ST_MsgHead
 };
 
 /**
+	类    型 :	连接消息
+	功能说明 :	当某个客户端连接上服务器之后应该主动发送连接消息，将基本的IP等信息交给服务器保存
+*/
+struct ST_MsgConnect
+{
+	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
+	ST_ClientInfo stClientInfo;
+};
+
+
+
+/**
 	类    型 :	登陆消息
 	功能说明 :
 */

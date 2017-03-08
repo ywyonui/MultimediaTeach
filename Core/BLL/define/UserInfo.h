@@ -44,3 +44,16 @@ struct ST_RegUserInfo
 		memset(strUserPwd, 0, 30);
 	}
 };
+
+
+/**
+	类    型 :	客户端信息
+	功能说明 :	当某个客户端连接上服务器之后应该主动发送连接消息，将基本的IP等信息交给服务器保存
+*/
+struct ST_ClientInfo
+{
+	DWORD		dwSocket;
+	char		arrIP[4];	// IP地址
+	EClientType		eCT;	// 客户端类型	
+	EClientStatus	eCS;	// 客户端状态信息
+};

@@ -3,6 +3,7 @@
 
 #include "BLL/UserMgr.h"
 #include "BLL/define/EUIMsg.h"
+#include <vector>
 
 #include <iostream>
 using namespace std;
@@ -17,6 +18,7 @@ public:
 private:
 	HWND m_hWnd;
 	std::string m_strToWnd;
+	std::vector<ST_ClientInfo> m_vecClientInfo;
 
 public:
 	void SetHwnd(HWND hWnd) { m_hWnd = hWnd; }
@@ -25,13 +27,15 @@ private:
 	void SendRecvMsgToUI(DWORD dwID, ST_MsgHead* stHead, char* strBase, bool bSuccess);
 
 public:
+	// 用户连接
+	void UserConnect(DWORD dwID, void* vParam);
+	// 注册
 	void UserReg(DWORD dwID, void* vParam);
-
+	// 登陆
 	void UserLogin(DWORD dwID, void* vParam);
 };
 
-#pragma region 消息处理
-
+// 通知服务器界面显示数据
 void CMsgHelperMain::Imp::SendRecvMsgToUI(DWORD dwID, ST_MsgHead* stHead, char* strBase, bool bSuccess)
 {
 	char strID[10] = { 0 };
@@ -43,6 +47,25 @@ void CMsgHelperMain::Imp::SendRecvMsgToUI(DWORD dwID, ST_MsgHead* stHead, char* 
 	SendMessage(m_hWnd, EWND_MSG_SERVER_RECV, (WPARAM)(stHead), (LPARAM)(&m_strToWnd));
 }
 
+#pragma region 消息处理
+// 连接
+void CMsgHelperMain::Imp::UserConnect(DWORD dwID, void* vParam)
+{
+	ST_MsgConnect msg;
+	memcpy(&msg, vParam, sizeof(ST_MsgReg));
+	// 不同客户端类型，连接成功之后，做不同处理
+	if (msg.stMsgHead.clientType == eTeacher)
+	{
+
+	}
+	else
+	{
+
+	}
+
+	SendRecvMsgToUI(dwID, &msg.stMsgHead, "连接", true);
+}
+// 注册
 void CMsgHelperMain::Imp::UserReg(DWORD dwID, void* vParam)
 {
 	ST_MsgReg msg;
@@ -55,7 +78,7 @@ void CMsgHelperMain::Imp::UserReg(DWORD dwID, void* vParam)
 
 	SendRecvMsgToUI(dwID, &msg.stMsgHead, "注册", msgRes.bSuccess);
 }
-
+// 登陆
 void CMsgHelperMain::Imp::UserLogin(DWORD dwID, void* vParam)
 {
 	ST_MsgLogin msg;
@@ -124,6 +147,11 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 
 	switch (stHead.msgType)
 	{
+	case eConnect:
+	{
+		m_pImp->UserReg(dwID, vParam);
+	}
+	break;
 	case eReg:
 	{
 		m_pImp->UserReg(dwID, vParam);

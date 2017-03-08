@@ -18,6 +18,17 @@ enum EClientType
 	eStudent = 2,	// 学生端
 };
 
+/**
+	类    型 :	客户端状态
+	功能说明 :	
+*/
+enum EClientStatus
+{
+	eDisConnect = 0,	// 未连接
+	eConnect,			// 连接中，未登录
+	eLogin				// 登陆成功
+};
+
 
 /**	
 	类    型 :	消息类型的枚举
@@ -26,6 +37,7 @@ enum EClientType
 */
 enum EMsgType
 {
+	eConnect,	// 连接消息，初始化成功后，通知服务器，连接成功，并且传输对应的IP地址之类的数据
 	eReg,		// 注册
 	eRegResult,	// 注册返回消息
 	eLogin,			// 登陆

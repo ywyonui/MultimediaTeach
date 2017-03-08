@@ -45,7 +45,7 @@ public:
 
 #pragma region 私有变量
 private:
-
+	std::vector<SOCKET>	m_vecSocket;
 #pragma endregion 私有变量
 
 
@@ -68,6 +68,7 @@ public:
 	功能说明:	断开连接是个特殊事件，客户端和服务器处理方式不同，因此留出接口重写，默认版本什么都不做
 	*************************************************************/
 	virtual void DisconnectCallBack(DWORD dwID);
+
 #pragma endregion 公共接口
 
 
