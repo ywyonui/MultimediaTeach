@@ -318,7 +318,7 @@ DWORD WINAPI CTCPNet::ServerWorkerThread(void* vParam)
 
 			default:
 			{
-				if (pMsgHelper)
+				if (pMsgHelper && lpPerIOData)
 				{
 					pMsgHelper->NetMsgCallBack(sClient, lpPerIOData->szMessage, dwTransferredLen);
 					// 激活一个WSARecv(代替recv)

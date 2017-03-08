@@ -1,97 +1,24 @@
 #include "stdafx.h"
 #include "MsgHelperMain.h"
 
-#include "BLL/UserMgr.h"
+#include "BLL/define/MsgInfo.h"
+#include "BLL/define/UserInfo.h"
 #include "BLL/define/EUIMsg.h"
+
+#include <windows.h>
 
 #include <iostream>
 using namespace std;
 
-#pragma region Imp
-class CMsgHelperMain::Imp
-{
-public:
-	Imp() {}
-	~Imp(){}
-
-private:
-	HWND m_hWnd;
-	std::string m_strToWnd;
-
-public:
-	void SetHwnd(HWND hWnd) { m_hWnd = hWnd; }
-
-private:
-	void SendRecvMsgToUI(DWORD dwID, ST_MsgHead* stHead, char* strBase, bool bSuccess);
-
-public:
-	void UserReg(DWORD dwID, void* vParam);
-
-	void UserLogin(DWORD dwID, void* vParam);
-};
-
-#pragma region 消息处理
-
-void CMsgHelperMain::Imp::SendRecvMsgToUI(DWORD dwID, ST_MsgHead* stHead, char* strBase, bool bSuccess)
-{
-	char strID[10] = { 0 };
-	sprintf_s(strID, "<%d>", dwID);
-	m_strToWnd = "SOCKET:";
-	m_strToWnd += strID;
-	m_strToWnd += strBase;
-	m_strToWnd += bSuccess ? "成功" : "失败";
-	SendMessage(m_hWnd, EWND_MSG_SERVER_RECV, (WPARAM)(stHead), (LPARAM)(&m_strToWnd));
-}
-
-void CMsgHelperMain::Imp::UserReg(DWORD dwID, void* vParam)
-{
-	ST_MsgReg msg;
-	memcpy(&msg, vParam, sizeof(ST_MsgReg));
-	ST_MsgRegResult msgRes;
-	msgRes.stMsgHead.msgType = eRegResult;
-	msgRes.stMsgHead.clientType = msg.stMsgHead.clientType;
-	msgRes.bSuccess = CUserMgr::GetInstance().RegUser(msg.stRegInfo, msg.stMsgHead.clientType);
-	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgRegResult));
-
-	SendRecvMsgToUI(dwID, &msg.stMsgHead, "注册", msgRes.bSuccess);
-}
-
-void CMsgHelperMain::Imp::UserLogin(DWORD dwID, void* vParam)
-{
-	ST_MsgLogin msg;
-	memcpy(&msg, vParam, sizeof(ST_MsgLogin));
-	ST_MsgLoginResult msgRes;
-	msgRes.stMsgHead.msgType = eLoginResult;
-	msgRes.stMsgHead.clientType = msg.stMsgHead.clientType;
-	msgRes.bSuccess = CUserMgr::GetInstance().Login(msg.stLoginInfo, msg.stMsgHead.clientType);
-
-	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgLoginResult));
-
-	SendRecvMsgToUI(dwID, &msg.stMsgHead, "登陆", msgRes.bSuccess);
-}
-
-#pragma endregion 消息处理
-
-
-#pragma endregion Imp
-
-
-
 CMsgHelperMain::CMsgHelperMain()
 	: m_hWnd(NULL)
 {
-	m_pImp = new Imp;
 }
 
 
 CMsgHelperMain::~CMsgHelperMain()
 {
 	m_hWnd = NULL;
-	if (m_pImp)
-	{
-		delete m_pImp;
-		m_pImp = NULL;
-	}
 }
 
 
@@ -121,22 +48,36 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 {
 	ST_MsgHead stHead;
 	memcpy(&stHead, vParam, sizeof(ST_MsgHead));
-
 	switch (stHead.msgType)
 	{
-	case eReg:
+	case eRegResult:	// 登陆返回消息
 	{
-		m_pImp->UserReg(dwID, vParam);
+		ST_MsgRegResult msg;
+		memcpy(&msg, vParam, sizeof(ST_MsgRegResult));
+		if (msg.bSuccess)
+		{
+			SendMessage(m_hWnd, WM_COMMAND, IDOK, 0);
+		}
+		else
+		{
+			AfxMessageBox(_T("注册失败，账号已经存在"));
+		}
 	}
 	break;
-	case eLogin:	// 登陆消息
+	case eLoginResult:	// 登陆返回消息
 	{
-		m_pImp->UserLogin(dwID, vParam);
+		ST_MsgLoginResult msg;
+		memcpy(&msg, vParam, sizeof(ST_MsgLoginResult));
+		if (msg.bSuccess)
+		{
+			SendMessage(m_hWnd, EWND_MSG_LOGIN_SUCCESS, 0, 0);
+		}
+		else
+		{
+			AfxMessageBox(_T("登陆失败，账号或密码或者类型错误"));
+		}
 	}
 	break;
-
-	default:
-		break;
 	}
 }
 
@@ -160,7 +101,6 @@ void CMsgHelperMain::DisconnectCallBack(DWORD dwID)
 void CMsgHelperMain::SetHwnd(HWND hWnd)
 {
 	m_hWnd = hWnd;
-	m_pImp->SetHwnd(hWnd);
 }
 
 /*************************************************************

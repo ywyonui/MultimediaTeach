@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{19418C99-147C-47BC-B7C3-256EA6A1A57D}</ProjectGuid>
-    <RootNamespace>Server</RootNamespace>
+    <ProjectGuid>{EE3F9164-91F6-4E2B-95F2-82F0C76F3C33}</ProjectGuid>
+    <RootNamespace>Client</RootNamespace>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -55,6 +55,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -73,9 +74,7 @@
     </ResourceCompile>
     <PostBuildEvent>
       <Command>xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Net\Net.dll" "$(OutDir)"
-xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"
-xcopy /d /e /y "$(SolutionDir)data" "$(OutDir)"
-xcopy /d /e /y "$(SolutionDir)Core\DataBase\libmysql.dll" "$(OutDir)"</Command>
+xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -86,6 +85,7 @@ xcopy /d /e /y "$(SolutionDir)Core\DataBase\libmysql.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -108,37 +108,36 @@ xcopy /d /e /y "$(SolutionDir)Core\DataBase\libmysql.dll" "$(OutDir)"</Command>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Client.h" />
+    <ClInclude Include="DlgMain.h" />
     <ClInclude Include="Logic\MsgHelperMain.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Server.h" />
-    <ClInclude Include="ServerDlg.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="UI\DlgLogin.h" />
+    <ClInclude Include="UI\DlgReg.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="DlgMain.cpp" />
     <ClCompile Include="Logic\MsgHelperMain.cpp" />
-    <ClCompile Include="Server.cpp" />
-    <ClCompile Include="ServerDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="UI\DlgLogin.cpp" />
+    <ClCompile Include="UI\DlgReg.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Server.rc" />
+    <ResourceCompile Include="Client.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\Server.rc2" />
+    <None Include="res\Client.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Server.ico" />
+    <Image Include="res\Client.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties RESOURCE_FILE="Server.rc" />
-    </VisualStudio>
-  </ProjectExtensions>
 </Project>

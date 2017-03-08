@@ -81,6 +81,11 @@ BOOL CTeacherApp::InitInstance()
 		CDlgLogin dlgLogin;
 		if (dlgLogin.DoModal() != IDOK)
 		{
+			// 删除上面创建的 shell 管理器。
+			if (pShellManager != NULL)
+			{
+				delete pShellManager;
+			}
 			return FALSE;
 		}
 
