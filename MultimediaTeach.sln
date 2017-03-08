@@ -13,8 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Student", "Student\Student.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Teacher", "Teacher\Teacher.vcxproj", "{FBE3E0B3-40B9-4DE2-88D6-A6FD171D9B96}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Client\Client.vcxproj", "{EE3F9164-91F6-4E2B-95F2-82F0C76F3C33}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -55,12 +53,6 @@ Global
 		{FBE3E0B3-40B9-4DE2-88D6-A6FD171D9B96}.Release|Win32.ActiveCfg = Release|Win32
 		{FBE3E0B3-40B9-4DE2-88D6-A6FD171D9B96}.Release|Win32.Build.0 = Release|Win32
 		{FBE3E0B3-40B9-4DE2-88D6-A6FD171D9B96}.Release|x64.ActiveCfg = Release|Win32
-		{EE3F9164-91F6-4E2B-95F2-82F0C76F3C33}.Debug|Win32.ActiveCfg = Debug|Win32
-		{EE3F9164-91F6-4E2B-95F2-82F0C76F3C33}.Debug|Win32.Build.0 = Debug|Win32
-		{EE3F9164-91F6-4E2B-95F2-82F0C76F3C33}.Debug|x64.ActiveCfg = Debug|Win32
-		{EE3F9164-91F6-4E2B-95F2-82F0C76F3C33}.Release|Win32.ActiveCfg = Release|Win32
-		{EE3F9164-91F6-4E2B-95F2-82F0C76F3C33}.Release|Win32.Build.0 = Release|Win32
-		{EE3F9164-91F6-4E2B-95F2-82F0C76F3C33}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
