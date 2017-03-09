@@ -8,8 +8,7 @@
 
 #include "Logic/MsgHelperMain.h"
 
-#include "BLL/define/EUIMsg.h"
-
+#include "BLL/CoreDefine.h"
 
 #include <string>
 

@@ -19,9 +19,6 @@
     <Filter Include="DataBase">
       <UniqueIdentifier>{a5f662a6-f55e-485d-931b-db57d5ffb204}</UniqueIdentifier>
     </Filter>
-    <Filter Include="BLL\define">
-      <UniqueIdentifier>{ee373362-b226-4790-b21a-f91bd038036c}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -42,19 +39,10 @@
     <ClInclude Include="BLL\BaseBLL.h">
       <Filter>BLL</Filter>
     </ClInclude>
-    <ClInclude Include="BLL\define\EnumType.h">
-      <Filter>BLL\define</Filter>
-    </ClInclude>
-    <ClInclude Include="BLL\define\MsgInfo.h">
-      <Filter>BLL\define</Filter>
-    </ClInclude>
-    <ClInclude Include="BLL\define\UserInfo.h">
-      <Filter>BLL\define</Filter>
-    </ClInclude>
-    <ClInclude Include="BLL\define\EUIMsg.h">
-      <Filter>BLL\define</Filter>
-    </ClInclude>
     <ClInclude Include="BLL\UserMgr.h">
+      <Filter>BLL</Filter>
+    </ClInclude>
+    <ClInclude Include="BLL\CoreDefine.h">
       <Filter>BLL</Filter>
     </ClInclude>
   </ItemGroup>

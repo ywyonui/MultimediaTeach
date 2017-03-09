@@ -2,7 +2,6 @@
 #include "MsgHelperMain.h"
 
 #include "BLL/UserMgr.h"
-#include "BLL/define/EUIMsg.h"
 #include <vector>
 
 #include <iostream>
@@ -22,6 +21,7 @@ private:
 
 public:
 	void SetHwnd(HWND hWnd) { m_hWnd = hWnd; }
+	std::vector<ST_ClientInfo>& GetClientList() { return m_vecClientInfo; }
 
 private:
 	void SendRecvMsgToUI(DWORD dwID, ST_MsgHead* stHead, char* strBase, bool bSuccess);
@@ -33,6 +33,11 @@ public:
 	void UserReg(DWORD dwID, void* vParam);
 	// 登陆
 	void UserLogin(DWORD dwID, void* vParam);
+
+public:
+	void DisconnectCallBack(DWORD dwID);
+
+
 };
 
 // 通知服务器界面显示数据
@@ -52,16 +57,41 @@ void CMsgHelperMain::Imp::SendRecvMsgToUI(DWORD dwID, ST_MsgHead* stHead, char* 
 void CMsgHelperMain::Imp::UserConnect(DWORD dwID, void* vParam)
 {
 	ST_MsgConnect msg;
-	memcpy(&msg, vParam, sizeof(ST_MsgReg));
+	memcpy(&msg, vParam, sizeof(ST_MsgConnect));
+
+	ST_MsgConnectResult msgRes;
+	msgRes.stMsgHead.clientType = msg.stMsgHead.clientType;
 	// 不同客户端类型，连接成功之后，做不同处理
 	if (msg.stMsgHead.clientType == eTeacher)
 	{
+		ST_ClientInfo st;
+		st.dwSocket = dwID;
+		memcpy(st.arrIP, msg.arrIP, 16);
+		st.eCS = eClientConnect;
+		st.eCT = msg.stMsgHead.clientType;
+		m_vecClientInfo.push_back(st);
 
+		msgRes.bSuccess = true;
 	}
-	else
+	else 
 	{
-
+		bool bIPinList = false;
+		// 学生端的基本信息是在教师端的配置中进行插入的
+		for (auto& it : m_vecClientInfo)
+		{
+			// 找到IP相同的客户端，改变他的状态信息，并且记录对应的Socket
+			if (!memcmp(it.arrIP, msg.arrIP, 16))
+			{
+				it.dwSocket = dwID;
+				it.eCS = eClientConnect;
+				it.eCT = msg.stMsgHead.clientType;
+				bIPinList = true;
+				break;
+			}
+		}
+		msgRes.bSuccess = bIPinList;
 	}
+	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgConnectResult));
 
 	SendRecvMsgToUI(dwID, &msg.stMsgHead, "连接", true);
 }
@@ -71,7 +101,7 @@ void CMsgHelperMain::Imp::UserReg(DWORD dwID, void* vParam)
 	ST_MsgReg msg;
 	memcpy(&msg, vParam, sizeof(ST_MsgReg));
 	ST_MsgRegResult msgRes;
-	msgRes.stMsgHead.msgType = eRegResult;
+	msgRes.stMsgHead.msgType = eMsgRegResult;
 	msgRes.stMsgHead.clientType = msg.stMsgHead.clientType;
 	msgRes.bSuccess = CUserMgr::GetInstance().RegUser(msg.stRegInfo, msg.stMsgHead.clientType);
 	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgRegResult));
@@ -84,13 +114,45 @@ void CMsgHelperMain::Imp::UserLogin(DWORD dwID, void* vParam)
 	ST_MsgLogin msg;
 	memcpy(&msg, vParam, sizeof(ST_MsgLogin));
 	ST_MsgLoginResult msgRes;
-	msgRes.stMsgHead.msgType = eLoginResult;
+	msgRes.stMsgHead.msgType = eMsgLoginResult;
 	msgRes.stMsgHead.clientType = msg.stMsgHead.clientType;
 	msgRes.bSuccess = CUserMgr::GetInstance().Login(msg.stLoginInfo, msg.stMsgHead.clientType);
 
 	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgLoginResult));
 
 	SendRecvMsgToUI(dwID, &msg.stMsgHead, "登陆", msgRes.bSuccess);
+}
+
+// 断开连接
+void CMsgHelperMain::Imp::DisconnectCallBack(DWORD dwID)
+{
+	// 断开的时候，教师端需要向所有学生端发送消息，并且关闭所有学生端，并且清空服务器列表
+
+	for (auto& it = m_vecClientInfo.begin(); it != m_vecClientInfo.end(); )
+	{
+		if (it->dwSocket == dwID) 
+		{
+			if (it->eCT == eTeacher)
+			{
+				auto it2 = it;
+				m_vecClientInfo.erase(it2);
+				ST_MsgHead stResult;
+				stResult.msgType = eMsgDisConnect;
+				int nSize = sizeof(ST_MsgHead);
+				for (auto& it : m_vecClientInfo)
+				{
+					CTCPNet::GetInstance().SendToClient(it.dwSocket, &stResult, nSize);
+				}
+				m_vecClientInfo.clear();
+			}
+			else
+			{
+				it->eCS = eClientDisConnect;
+			}
+			break;
+		}
+		it++;
+	}
 }
 
 #pragma endregion 消息处理
@@ -147,17 +209,17 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 
 	switch (stHead.msgType)
 	{
-	case eConnect:
+	case eMsgConnect:
+	{
+		m_pImp->UserConnect(dwID, vParam);
+	}
+	break;
+	case eMsgReg:
 	{
 		m_pImp->UserReg(dwID, vParam);
 	}
 	break;
-	case eReg:
-	{
-		m_pImp->UserReg(dwID, vParam);
-	}
-	break;
-	case eLogin:	// 登陆消息
+	case eMsgLogin:	// 登陆消息
 	{
 		m_pImp->UserLogin(dwID, vParam);
 	}
@@ -176,7 +238,7 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 *************************************************************/
 void CMsgHelperMain::DisconnectCallBack(DWORD dwID)
 {
-
+	m_pImp->DisconnectCallBack(dwID);
 }
 
 /*************************************************************

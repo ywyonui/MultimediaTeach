@@ -10,9 +10,9 @@
 
 #include "Logic/MsgHelperMain.h"
 #include "DataBase/DBMySQL.h"
-#include "BLL/define/MsgInfo.h"
-#include "BLL/define/EUIMsg.h"
+#include "BLL/CoreDefine.h"
 
+#include <iostream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

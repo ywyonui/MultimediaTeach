@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "MsgHelperMain.h"
-
-#include "BLL/define/MsgInfo.h"
-#include "BLL/define/UserInfo.h"
-#include "BLL/define/EUIMsg.h"
+#include "BLL/CoreDefine.h"
 
 #include <iostream>
 using namespace std;
@@ -48,7 +45,7 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 	memcpy(&stHead, vParam, sizeof(ST_MsgHead));
 	switch (stHead.msgType)
 	{
-	case eRegResult:	// 登陆返回消息
+	case eMsgRegResult:	// 登陆返回消息
 	{
 		ST_MsgRegResult msg;
 		memcpy(&msg, vParam, sizeof(ST_MsgRegResult));
@@ -62,7 +59,7 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		}
 	}
 	break;
-	case eLoginResult:	// 登陆返回消息
+	case eMsgLoginResult:	// 登陆返回消息
 	{
 		ST_MsgLoginResult msg;
 		memcpy(&msg, vParam, sizeof(ST_MsgLoginResult));

@@ -7,6 +7,8 @@
 #include "afxdialogex.h"
 #include "DlgMain.h"
 
+#include "BLL/CoreDefine.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
