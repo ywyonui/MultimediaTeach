@@ -8,7 +8,6 @@
 #include "DlgMain.h"
 
 #include "BLL/CoreDefine.h"
-#include "Logic/MsgHelperMain.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,6 +26,15 @@ CDlgMain::CDlgMain(CWnd* pParent /*=NULL*/)
 	m_nBtnHeight = 30;
 }
 
+CDlgMain::~CDlgMain()
+{
+	if (m_pLockScreen == NULL)
+	{
+		delete m_pLockScreen;
+		m_pLockScreen = NULL;
+	}
+}
+
 void CDlgMain::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -41,6 +49,7 @@ BEGIN_MESSAGE_MAP(CDlgMain, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
 	ON_MESSAGE(EWND_MSG_CLIENT_RECV, &CDlgMain::OnServerMsgResult)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -66,11 +75,19 @@ BOOL CDlgMain::OnInitDialog()
 	m_listCtrl.InsertColumn(2, _T("状态"), LVCFMT_LEFT, 80);
 	m_listCtrl.InsertColumn(3, _T("IP地址"), LVCFMT_LEFT, 150);
 
-	MoveWindow(static_cast<int>(nSW * 0.1), static_cast<int>(nSH * 0.1), static_cast<int>(nSW * 0.8), static_cast<int>(nSH * 0.8));
+	CRect rc(static_cast<int>(nSW * 0.1), static_cast<int>(nSH * 0.1), static_cast<int>(nSW * 0.9), static_cast<int>(nSH * 0.9));
+	MoveWindow(rc);
 
 	AskForClientList();
 
-
+	if (m_pLockScreen == NULL)
+	{
+		delete m_pLockScreen;
+		m_pLockScreen = NULL;
+	}
+ 	m_pLockScreen = new CDlgLockScreen;
+ 	m_pLockScreen->Create(IDD_DLG_LOCK_SCREEN, this);
+ 	m_pLockScreen->MoveWindow(rc);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -135,7 +152,7 @@ void CDlgMain::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-
+// 接收消息的函数
 LRESULT CDlgMain::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
 {
 	switch ((EMsgType)lParam)
@@ -143,6 +160,17 @@ LRESULT CDlgMain::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
 	case eMsgAskClientListResult:
 	{
 		UpdateList(wParam);
+		CMsgHelperMain::GetInstance().SetHwnd(GetSafeHwnd());
+	}
+	break;
+	case eMsgLockScreen:
+	{
+		m_pLockScreen->ShowWindow(SW_SHOW);
+	}
+	break;
+	case eMsgUnLockScreen:
+	{
+		m_pLockScreen->ShowWindow(SW_HIDE);
 	}
 	break;
 
@@ -237,3 +265,16 @@ void CDlgMain::MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn)
 }
 
 #pragma endregion
+
+void CDlgMain::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	// TODO:  在此处添加消息处理程序代码
+	if (m_pLockScreen == NULL)
+	{
+		m_pLockScreen->SendMessage(WM_DESTROY);
+		delete m_pLockScreen;
+		m_pLockScreen = NULL;
+	}
+}

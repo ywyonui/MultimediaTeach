@@ -38,6 +38,9 @@ public:
 	// 教师端点配置
 	void SetStudentClientIP(DWORD dwID, void* vParam);
 
+	// 纯粹的消息转发
+	void SendMessageToStudent(EMsgType msgType);
+
 public:
 	void DisconnectCallBack(DWORD dwID);
 
@@ -162,12 +165,15 @@ void CMsgHelperMain::Imp::DisconnectCallBack(DWORD dwID)
 			else
 			{
 				it->eCS = eClientDisConnect;
+				it->dwSocket = 0;
+				AskClientList(0, NULL);
 			}
 			break;
 		}
 		it++;
 	}
 }
+
 // 申请获取列表
 void CMsgHelperMain::Imp::AskClientList(DWORD dwID, void* vParam)
 {
@@ -213,6 +219,21 @@ void CMsgHelperMain::Imp::SetStudentClientIP(DWORD dwID, void* vParam)
 		m_vecClientInfo.push_back(st);
 	}
 }
+// 锁屏
+void CMsgHelperMain::Imp::SendMessageToStudent(EMsgType msgType)
+{
+	ST_MsgHead msgRes;
+	msgRes.clientType = eStudent;
+	msgRes.msgType = msgType;
+	for (auto& it : m_vecClientInfo)
+	{
+		if (it.eCT == eStudent && it.dwSocket)
+		{
+			CTCPNet::GetInstance().SendToClient(it.dwSocket, &msgRes, sizeof(ST_MsgAskClientListResult));
+		}
+	}
+}
+
 
 #pragma endregion 消息处理
 
@@ -293,7 +314,12 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		m_pImp->SetStudentClientIP(dwID, vParam);
 	}
 	break;
-
+	case eMsgLockScreen:
+	case eMsgUnLockScreen:
+	{
+		m_pImp->SendMessageToStudent(stHead.msgType);
+	}
+	break;
 	default:
 		break;
 	}

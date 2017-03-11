@@ -5,6 +5,7 @@
 #pragma once
 #include "afxwin.h"
 #include "afxcmn.h"
+#include "UI/DlgLockScreen.h"
 
 
 // CDlgMain 对话框
@@ -13,6 +14,7 @@ class CDlgMain : public CDialogEx
 // 构造
 public:
 	CDlgMain(CWnd* pParent = NULL);	// 标准构造函数
+	~CDlgMain();
 
 // 对话框数据
 	enum { IDD = IDD_DLG_MAIN };
@@ -48,6 +50,8 @@ protected:
 	void MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn = FALSE);
 
 
+private:
+	CDlgLockScreen* m_pLockScreen;
 
 // 实现
 protected:
@@ -61,5 +65,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	// 自定义消息处理
 	afx_msg LRESULT OnServerMsgResult(WPARAM, LPARAM);
+
 public:
+	afx_msg void OnDestroy();
 };

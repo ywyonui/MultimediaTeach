@@ -50,6 +50,7 @@ BEGIN_MESSAGE_MAP(CDlgMain, CDialogEx)
 	ON_WM_SIZE()
 	ON_MESSAGE(EWND_MSG_CLIENT_RECV, &CDlgMain::OnServerMsgResult)
 	ON_BN_CLICKED(IDC_BTN_SETTING, &CDlgMain::OnBnClickedBtnSetting)
+	ON_BN_CLICKED(IDC_BTN_LOCK, &CDlgMain::OnBnClickedBtnLock)
 END_MESSAGE_MAP()
 
 
@@ -251,7 +252,30 @@ void CDlgMain::MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn)
 }
 
 #pragma endregion
+// 锁屏
+void CDlgMain::OnBnClickedBtnLock()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	ST_MsgHead msg;
+	msg.clientType = eTeacher;
 
+	CString str;
+	GetDlgItem(IDC_BTN_LOCK)->GetWindowText(str);
+	if (str == _T("锁屏"))
+	{
+		msg.msgType = eMsgLockScreen;
+		GetDlgItem(IDC_BTN_LOCK)->SetWindowText(_T("解锁"));
+	}
+	else
+	{
+		msg.msgType = eMsgUnLockScreen;
+		GetDlgItem(IDC_BTN_LOCK)->SetWindowText(_T("锁屏"));
+	}
+
+	CTCPNet::GetInstance().SendToServer(&msg, sizeof(ST_MsgHead));
+}
+
+// 配置
 void CDlgMain::OnBnClickedBtnSetting()
 {
 	// TODO:  在此添加控件通知处理程序代码

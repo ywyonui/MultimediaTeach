@@ -193,6 +193,10 @@ LRESULT CDlgLogin::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
 		}
 	}
 	break;
+	case eMsgLockScreen:
+	{
+
+	}
 
 	default:
 		break;

@@ -194,6 +194,10 @@ void CServerDlg::OnDestroy()
 afx_msg LRESULT CServerDlg::OnMsgServerRecv(WPARAM wParam, LPARAM lParam)
 {
 	ST_MsgHead* pHead = (ST_MsgHead*)wParam;
+	if (!pHead)
+	{
+		return 0;
+	}
 	CWnd* pWnd = &m_edit_t;
 	if (pHead->clientType == eStudent)
 	{

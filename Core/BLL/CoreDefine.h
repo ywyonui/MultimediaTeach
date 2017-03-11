@@ -55,7 +55,9 @@ enum EMsgType
 	eMsgAskClientList,	// 申请获取客户端列表信息
 	eMsgAskClientListResult,	// 返回申请
 
-	eMsgSettingStudentIP
+	eMsgLockScreen,			// 锁屏消息
+	eMsgUnLockScreen,		// 解锁消息
+	eMsgSettingStudentIP,	// 配置
 };
 
 #pragma endregion 枚举类型

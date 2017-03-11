@@ -73,4 +73,5 @@ protected:
 
 public:
 	afx_msg void OnBnClickedBtnSetting();
+	afx_msg void OnBnClickedBtnLock();
 };

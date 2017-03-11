@@ -54,7 +54,7 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		memcpy(&msg, vParam, sizeof(ST_MsgHead));
 		bool bSuccess = msg.clientType == 0;
 
-		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, bSuccess, eMsgConnectResult);
+		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, bSuccess, stHead.msgType);
 	}
 	break;
 	case eMsgRegResult:	// 登陆返回消息
@@ -77,7 +77,7 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		memcpy(&msg, vParam, sizeof(ST_MsgLoginResult));
 		if (msg.bSuccess)
 		{
-			SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, 0, eMsgLoginResult);
+			SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, 0, stHead.msgType);
 		}
 		else
 		{
@@ -89,9 +89,17 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 	{
 		ST_MsgAskClientListResult msg;
 		memcpy(&msg, vParam, sizeof(ST_MsgAskClientListResult));
-		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, (WPARAM)&msg, eMsgAskClientListResult);
+		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, (WPARAM)&msg, stHead.msgType);
 	}
 	break;
+	case eMsgLockScreen:	// 锁屏
+	case eMsgUnLockScreen:	// 解锁
+	{
+		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, 0, stHead.msgType);
+	}
+	break;
+	
+
 	}
 }
 
