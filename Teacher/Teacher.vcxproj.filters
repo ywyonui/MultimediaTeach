@@ -48,6 +48,9 @@
     <ClInclude Include="UI\DlgReg.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="UI\DlgSetting.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Teacher.cpp">
@@ -66,6 +69,9 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="UI\DlgReg.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\DlgSetting.cpp">
       <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>

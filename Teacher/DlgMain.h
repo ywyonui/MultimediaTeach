@@ -3,7 +3,8 @@
 //
 
 #pragma once
-
+#include <vector>
+#include "BLL/CoreDefine.h"
 
 // CDlgMain 对话框
 class CDlgMain : public CDialogEx
@@ -39,8 +40,17 @@ private:
 
 
 protected:
+
+	/*************************************************************
+	函数名称:	SearchUserList
+	参数说明:	vecClient（OUT）: 输出参数，返回查询到的用户列表
+	返 回 值:	void
+	功能说明:	查询用户列表，用于记录显示
+	*************************************************************/
+	void AskForClientList();
+
 	// 更新列表的数据，初始化插入标题，否则插入数据
-	void UpdateList(BOOL bInitFlag);
+	void UpdateList(WPARAM wParam);
 
 	// 调整按钮位置的通用函数
 	void MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn = FALSE);
@@ -56,6 +66,11 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+	// 自定义消息处理
+	afx_msg LRESULT OnServerMsgResult(WPARAM, LPARAM);
+
+
 
 public:
+	afx_msg void OnBnClickedBtnSetting();
 };

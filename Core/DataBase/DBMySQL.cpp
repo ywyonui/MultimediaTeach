@@ -107,6 +107,11 @@ void CDBMySQL::DisConnMySQL()
 {
 	MYSQL& mySQL = m_pImp->m_MySQL;
 	mysql_close(&mySQL);
+	if (m_pImp)
+	{
+		delete m_pImp;
+		m_pImp = NULL;
+	}
 }
 
 /*************************************************************

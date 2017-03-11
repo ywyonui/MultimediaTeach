@@ -116,6 +116,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <ClInclude Include="Teacher.h" />
     <ClInclude Include="UI\DlgLogin.h" />
     <ClInclude Include="UI\DlgReg.h" />
+    <ClInclude Include="UI\DlgSetting.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DlgMain.cpp" />
@@ -127,6 +128,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <ClCompile Include="Teacher.cpp" />
     <ClCompile Include="UI\DlgLogin.cpp" />
     <ClCompile Include="UI\DlgReg.cpp" />
+    <ClCompile Include="UI\DlgSetting.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Teacher.rc" />

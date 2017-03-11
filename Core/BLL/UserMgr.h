@@ -9,6 +9,7 @@
 /***************************************************************************************/
 #include "BaseBLL.h"
 #include "CoreDefine.h"
+#include <vector>
 
 /**	
 	类    型 :	
@@ -59,13 +60,12 @@ public:
 	bool Login(const ST_LoginUserInfo& stLoginUserInfo, const EClientType& eType);
 
 	/*************************************************************
-	函数名称:	SearchUserList
-	参数说明:	list（OUT）: 输出参数，返回查询到的用户列表 
+	函数名称:	AskForClientList
+	参数说明:	vecClient（OUT）: 输出参数，返回查询到的用户列表 
 	返 回 值:	bool :	是否成功
 	功能说明:	查询用户列表，用于记录显示
 	*************************************************************/
-	bool SearchUserList(OUT int& list);
-
+	bool AskForClientList(std::vector<ST_ClientInfo>& vecClient);
 
 #pragma endregion 公共接口
 

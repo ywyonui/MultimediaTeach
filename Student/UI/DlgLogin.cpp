@@ -6,10 +6,12 @@
 #include "DlgLogin.h"
 #include "DlgReg.h"
 
+#include <Iphlpapi.h>
+#pragma comment(lib,"Iphlpapi.lib") //需要添加Iphlpapi.lib库
+
 #include "Logic/MsgHelperMain.h"
 
-#include "BLL/define/EUIMsg.h"
-
+#include "BLL/CoreDefine.h"
 
 #include <string>
 
@@ -32,17 +34,87 @@ void CDlgLogin::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 }
 
+#pragma region 其他
+
+void GetCurrentIP(char* pBuffer)
+{
+	std::string strAddress;
+	int nCardNo = 1;
+	//PIP_ADAPTER_INFO结构体指针存储本机网卡信息
+	PIP_ADAPTER_INFO pIpAdapterInfo = new IP_ADAPTER_INFO();
+	//得到结构体大小,用于GetAdaptersInfo参数
+	unsigned long stSize = sizeof(IP_ADAPTER_INFO);
+	//调用GetAdaptersInfo函数,填充pIpAdapterInfo指针变量;其中stSize参数既是一个输入量也是一个输出量
+	int nRel = GetAdaptersInfo(pIpAdapterInfo, &stSize);
+	//记录网卡数量
+	int netCardNum = 0;
+	//记录每张网卡上的IP地址数量
+	int IPnumPerNetCard = 0;
+	if (ERROR_BUFFER_OVERFLOW == nRel)
+	{
+		//如果函数返回的是ERROR_BUFFER_OVERFLOW
+		//则说明GetAdaptersInfo参数传递的内存空间不够,同时其传出stSize,表示需要的空间大小
+		//这也是说明为什么stSize既是一个输入量也是一个输出量
+		//释放原来的内存空间
+		delete pIpAdapterInfo;
+		//重新申请内存空间用来存储所有网卡信息
+		pIpAdapterInfo = (PIP_ADAPTER_INFO)new BYTE[stSize];
+		//再次调用GetAdaptersInfo函数,填充pIpAdapterInfo指针变量
+		nRel = GetAdaptersInfo(pIpAdapterInfo, &stSize);
+	}
+
+	PIP_ADAPTER_INFO pIpInfo = pIpAdapterInfo;
+	if (ERROR_SUCCESS == nRel)
+	{
+		//输出网卡信息
+		//可能有多网卡,因此通过循环去判断
+		while (pIpAdapterInfo)
+		{
+			//可能网卡有多IP,因此通过循环去判断
+			IP_ADDR_STRING *pIpAddrString = &(pIpAdapterInfo->IpAddressList);
+			switch (pIpAdapterInfo->Type)
+			{
+			case MIB_IF_TYPE_OTHER:
+			case MIB_IF_TYPE_ETHERNET:
+			case MIB_IF_TYPE_TOKENRING:
+			case MIB_IF_TYPE_FDDI:
+			case MIB_IF_TYPE_PPP:
+			case MIB_IF_TYPE_LOOPBACK:
+			case MIB_IF_TYPE_SLIP:
+			{
+				// 这一堆不知道什么IP类型
+			}
+			break;
+			case 71: 
+			{	// 无线网卡
+				memcpy(pBuffer, pIpAddrString->IpAddress.String, 16);
+			}
+			break;
+			default:
+				// 未知类型网卡就跳出
+				break;
+			}
+			pIpAdapterInfo = pIpAdapterInfo->Next;
+		}
+	}
+	//释放内存空间
+	if (pIpInfo)
+	{
+		delete pIpInfo;
+	}
+}
+#pragma endregion 其他
+
+
 
 BEGIN_MESSAGE_MAP(CDlgLogin, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_LOGIN, &CDlgLogin::OnLogin)
 	ON_BN_CLICKED(IDC_BTN_REG, &CDlgLogin::OnRegUser)
-	ON_MESSAGE(EWND_MSG_LOGIN_SUCCESS, &CDlgLogin::OnWndMsgLogin)
+	ON_MESSAGE(EWND_MSG_CLIENT_RECV, &CDlgLogin::OnServerMsgResult)
 END_MESSAGE_MAP()
 
 
 // CDlgLogin 消息处理程序
-
-
 void CDlgLogin::OnLogin()
 {
 	// TODO:  在此添加控件通知处理程序代码
@@ -103,10 +175,29 @@ void CDlgLogin::OnRegUser()
 
 }
 
-
-LRESULT CDlgLogin::OnWndMsgLogin(WPARAM wParam, LPARAM lParam)
+LRESULT CDlgLogin::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
 {
-	CDialogEx::OnOK();
+	switch ((EMsgType)lParam)
+	{
+	case eMsgLoginResult:
+	{
+		PostMessage(WM_COMMAND, IDOK, 0);
+	}
+	break;
+	case eMsgConnectResult:
+	{
+		if (!wParam)
+		{
+			AfxMessageBox(_T("当前IP不属于教师端指定的IP地址，连接服务器失败！"));
+			PostMessage(WM_COMMAND, IDCANCEL, 0);
+		}
+	}
+	break;
+
+	default:
+		break;
+	}
+
 	return 0;
 }
 
@@ -123,4 +214,24 @@ BOOL CDlgLogin::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+BOOL CDlgLogin::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  在此添加额外的初始化
+	ST_MsgConnect stConnect;
+	GetCurrentIP(stConnect.arrIP);
+	stConnect.stMsgHead.clientType = eStudent;
+	CTCPNet::GetInstance().SendToServer(&stConnect, sizeof(ST_MsgConnect));
+
+	CMsgHelperMain::GetInstance().SetHwnd(GetSafeHwnd());
+
+
+	GetDlgItem(IDC_EDIT_NAME)->SetWindowText(_T("Student"));
+	GetDlgItem(IDC_EDIT_PWD)->SetWindowText(_T("123456"));
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 异常:  OCX 属性页应返回 FALSE
 }

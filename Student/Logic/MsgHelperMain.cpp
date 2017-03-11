@@ -1,9 +1,7 @@
 #include "stdafx.h"
 #include "MsgHelperMain.h"
 
-#include "BLL/define/MsgInfo.h"
-#include "BLL/define/UserInfo.h"
-#include "BLL/define/EUIMsg.h"
+#include "BLL/CoreDefine.h"
 
 #include <windows.h>
 
@@ -50,7 +48,16 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 	memcpy(&stHead, vParam, sizeof(ST_MsgHead));
 	switch (stHead.msgType)
 	{
-	case eRegResult:	// 登陆返回消息
+	case eMsgConnectResult:
+	{
+		ST_MsgHead msg;
+		memcpy(&msg, vParam, sizeof(ST_MsgHead));
+		bool bSuccess = msg.clientType == 0;
+
+		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, bSuccess, eMsgConnectResult);
+	}
+	break;
+	case eMsgRegResult:	// 登陆返回消息
 	{
 		ST_MsgRegResult msg;
 		memcpy(&msg, vParam, sizeof(ST_MsgRegResult));
@@ -64,19 +71,25 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		}
 	}
 	break;
-	case eLoginResult:	// 登陆返回消息
+	case eMsgLoginResult:	// 登陆返回消息
 	{
 		ST_MsgLoginResult msg;
 		memcpy(&msg, vParam, sizeof(ST_MsgLoginResult));
 		if (msg.bSuccess)
 		{
-		//	SendMessage(m_hWnd, EWND_MSG_LOGIN, (DWORD)&msg.stShowUserInfo, 0);
-			SendMessage(m_hWnd, EWND_MSG_LOGIN_SUCCESS, 0, 0);
+			SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, 0, eMsgLoginResult);
 		}
 		else
 		{
 			AfxMessageBox(_T("登陆失败，账号或密码或者类型错误"));
 		}
+	}
+	break;
+	case eMsgAskClientListResult:	// 获取列表返回消息
+	{
+		ST_MsgAskClientListResult msg;
+		memcpy(&msg, vParam, sizeof(ST_MsgAskClientListResult));
+		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, (WPARAM)&msg, eMsgAskClientListResult);
 	}
 	break;
 	}

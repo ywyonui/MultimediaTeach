@@ -8,6 +8,7 @@
 #include "UI/DlgLogin.h"
 
 #include "Logic/MsgHelperMain.h"
+#include "BLL/CoreDefine.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,12 +55,7 @@ BOOL CStudentApp::InitInstance()
 
 	CWinApp::InitInstance();
 
-
 	AfxEnableControlContainer();
-
-	// 创建 shell 管理器，以防对话框包含
-	// 任何 shell 树视图控件或 shell 列表视图控件。
-	CShellManager *pShellManager = new CShellManager;
 
 	// 激活“Windows Native”视觉管理器，以便在 MFC 控件中启用主题
 	CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows));
@@ -81,30 +77,18 @@ BOOL CStudentApp::InitInstance()
 		CDlgLogin dlgLogin;
 		if (dlgLogin.DoModal() != IDOK)
 		{
-			// 删除上面创建的 shell 管理器。
-			if (pShellManager != NULL)
-			{
-				delete pShellManager;
-			}
 			return FALSE;
 		}
 
 		{	// 主程序
 			CDlgMain dlg;
-			m_pMainWnd = &dlg;
+			m_pMainWnd = (CWnd*)&dlg;
 
 			if (dlg.DoModal() == IDOK)
 			{
 
 			}
 		}
-	}
-
-
-	// 删除上面创建的 shell 管理器。
-	if (pShellManager != NULL)
-	{
-		delete pShellManager;
 	}
 
 	// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，

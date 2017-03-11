@@ -96,8 +96,9 @@ bool CUserMgr::Login(const ST_LoginUserInfo& stLoginUserInfo, const EClientType&
 返 回 值:	bool :	是否成功
 功能说明:	查询用户列表，用于记录显示
 *************************************************************/
-bool CUserMgr::SearchUserList(OUT int& list)
+bool CUserMgr::AskForClientList(std::vector<ST_ClientInfo>& vecClient)
 {
+
 	return true;
 }
 

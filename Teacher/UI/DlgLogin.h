@@ -29,12 +29,12 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnInitDialog();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnLogin();
 	afx_msg void OnRegUser();
 	// 自定义消息处理
-	afx_msg LRESULT OnWndMsgLogin(WPARAM, LPARAM);
-
+	afx_msg LRESULT OnServerMsgResult(WPARAM, LPARAM);
 
 };

@@ -7,7 +7,9 @@
 #include "afxdialogex.h"
 #include "DlgMain.h"
 
-#include "BLL/CoreDefine.h"
+#include "UI/DlgSetting.h"
+
+#include "Logic/MsgHelperMain.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,6 +48,8 @@ BEGIN_MESSAGE_MAP(CDlgMain, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
+	ON_MESSAGE(EWND_MSG_CLIENT_RECV, &CDlgMain::OnServerMsgResult)
+	ON_BN_CLICKED(IDC_BTN_SETTING, &CDlgMain::OnBnClickedBtnSetting)
 END_MESSAGE_MAP()
 
 
@@ -64,10 +68,16 @@ BOOL CDlgMain::OnInitDialog()
 	int nSW = GetSystemMetrics(SM_CXSCREEN);
 	int nSH = GetSystemMetrics(SM_CYSCREEN);
 
+	CMsgHelperMain::GetInstance().SetHwnd(GetSafeHwnd());
+
+	m_listCtrl.InsertColumn(0, _T("序号"), LVCFMT_LEFT, 50);
+	m_listCtrl.InsertColumn(1, _T("类型"), LVCFMT_LEFT, 80);
+	m_listCtrl.InsertColumn(2, _T("状态"), LVCFMT_LEFT, 80);
+	m_listCtrl.InsertColumn(3, _T("IP地址"), LVCFMT_LEFT, 150);
+
 	MoveWindow(static_cast<int>(nSW * 0.1), static_cast<int>(nSH * 0.1), static_cast<int>(nSW * 0.8), static_cast<int>(nSH * 0.8));
 
-	// 更新列表
-	UpdateList(TRUE);
+	AskForClientList();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -109,7 +119,6 @@ HCURSOR CDlgMain::OnQueryDragIcon()
 }
 
 
-
 void CDlgMain::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
@@ -139,23 +148,88 @@ void CDlgMain::OnSize(UINT nType, int cx, int cy)
 
 }
 
-#pragma region
-// 更新界面列表
-void CDlgMain::UpdateList(BOOL bInitFlag)
-{
-	if (bInitFlag)
-	{
-		m_listCtrl.InsertColumn(0, _T("序号"), LVCFMT_LEFT, 50);
-		m_listCtrl.InsertColumn(1, _T("类型"), LVCFMT_LEFT, 80);
-		m_listCtrl.InsertColumn(2, _T("状态"), LVCFMT_LEFT, 80);
-		CRect rcClient;
-		GetClientRect(rcClient);
-		m_listCtrl.InsertColumn(3, _T("IP地址"), LVCFMT_LEFT, 150);
-	}
-	else
-	{
 
+LRESULT CDlgMain::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
+{
+	switch ((EMsgType)lParam)
+	{
+	case eMsgAskClientListResult:
+	{
+		UpdateList(wParam);
 	}
+	break;
+
+	default:
+		break;
+	}
+
+	return 0;
+}
+
+
+#pragma region
+/*************************************************************
+函数名称:	SearchUserList
+参数说明:	vecClient（OUT）: 输出参数，返回查询到的用户列表
+返 回 值:	void 
+功能说明:	查询用户列表，用于记录显示
+*************************************************************/
+void CDlgMain::AskForClientList()
+{
+	ST_MsgHead stHead;
+	stHead.clientType = eTeacher;
+	stHead.msgType = eMsgAskClientList;
+	CTCPNet::GetInstance().SendToServer(&stHead, sizeof(ST_MsgHead));
+}
+
+// 更新界面列表
+void CDlgMain::UpdateList(WPARAM wParam)
+{
+	m_listCtrl.DeleteAllItems();
+
+	ST_MsgAskClientListResult& st = *((ST_MsgAskClientListResult*)wParam);
+
+	for (int i = 0; i < st.nSize; i++)
+	{
+		CString str;
+		CStringA strA;
+		str.Format(_T("%d"), i + 1);
+		int nRow = m_listCtrl.InsertItem(0, str);
+		if (st.arrClient[i].eCT == eTeacher)
+		{
+			str = _T("教师");
+		}
+		else if (st.arrClient[i].eCT == eStudent)
+		{
+			str = _T("学生");
+		}
+		m_listCtrl.SetItemText(nRow, 1, str);
+		switch (st.arrClient[i].eCS)
+		{
+		case eClientConnect:
+		{
+			str = _T("已连接");
+		}
+		break;
+		case eClientDisConnect:
+		{
+			str = _T("已断开");
+		}
+		break;
+		case eClientLogin:
+		{
+			str = _T("已登陆");
+		}
+		break;
+		default:
+			break;
+		}
+		m_listCtrl.SetItemText(nRow, 2, str);
+		strA = st.arrClient[i].arrIP;
+		str = strA;
+		m_listCtrl.SetItemText(nRow, 3, str);
+	}
+
 }
 
 // 调整按钮位置
@@ -177,3 +251,13 @@ void CDlgMain::MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn)
 }
 
 #pragma endregion
+
+void CDlgMain::OnBnClickedBtnSetting()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	CDlgSetting dlg;
+	if (dlg.DoModal() == IDOK)
+	{
+		AskForClientList();
+	}
+}

@@ -10,6 +10,8 @@
 #include <windows.h>
 #include <string>
 
+#define MAX_STUDENT_CLIENT 10
+
 #pragma region 枚举类型
 /**
 	类    型 :	客户端类型
@@ -17,6 +19,8 @@
 */
 enum EClientType
 {
+	eClientToServerError = -1,
+	eClientToServerSuccess = 0,
 	eTeacher = 1,	// 教师端
 	eStudent = 2,	// 学生端
 };
@@ -47,27 +51,19 @@ enum EMsgType
 	eMsgRegResult,	// 注册返回消息
 	eMsgLogin,			// 登陆
 	eMsgLoginResult,	// 登陆返回消息
+
+	eMsgAskClientList,	// 申请获取客户端列表信息
+	eMsgAskClientListResult,	// 返回申请
+
+	eMsgSettingStudentIP
 };
-
-
-/**
-	类    型 :	返回类型
-	功能说明 :	定义一些返回类型，用于判断函数返回值
-*/
-enum EResultType
-{
-	eOK = 0,			// 返回正常
-	eLoginError = -1,	// 登陆失败
-};
-
-
 
 #pragma endregion 枚举类型
 
 #pragma region 网络模块通知界面的消息
 enum EUIMessage
 {
-	EWND_MSG_LOGIN_SUCCESS = WM_USER + 101,	// 登陆成功后的返回消息，WPARAM是登陆成功后返回的数据
+	EWND_MSG_CLIENT_RECV = WM_USER + 101,	// 登陆成功后的返回消息，WPARAM是登陆成功后返回的数据
 
 	EWND_MSG_SERVER_RECV = WM_USER + 2001	// 服务器接收到数据，传给界面显示
 };
@@ -130,12 +126,12 @@ struct ST_ClientInfo
 struct ST_MsgHead
 {
 	EMsgType msgType;
-	EClientType	clientType;
+	EClientType	clientType;	// 如果是客户端到服务器，表示客户端类型，从服务器到客户端则表示执行状态是否成功
 
 	ST_MsgHead()
 	{
 		msgType = eMsgLogin;
-		clientType = eStudent;
+		clientType = eClientToServerSuccess;
 	}
 };
 
@@ -155,22 +151,6 @@ struct ST_MsgConnect
 		stMsgHead.msgType = eMsgConnect;
 	}
 };
-
-/**
-类    型 :	连接返回
-功能说明 :	
-*/
-struct ST_MsgConnectResult
-{
-	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
-	bool bSuccess;
-
-	ST_MsgConnectResult()
-	{
-		stMsgHead.msgType = eMsgConnectResult;
-	}
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -218,7 +198,6 @@ struct ST_MsgReg
 	{
 		stMsgHead.msgType = eMsgReg;
 	}
-
 };
 
 /**
@@ -238,7 +217,43 @@ struct ST_MsgRegResult
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+类    型 :	登陆后的返回消息
+功能说明 :	登陆之后返回数据，正常情况下返回一个用户信息即可，
+*/
+struct ST_MsgAskClientListResult
+{
+	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
+	ST_ClientInfo arrClient[MAX_STUDENT_CLIENT + 1];	// 默认最大MAX_STUDENT_CLIENT个客户端
+	int			nSize;
 
+	ST_MsgAskClientListResult()
+	{
+		stMsgHead.msgType = eMsgAskClientListResult;
+		nSize = 0;
+	}
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+类    型 :	登陆后的返回消息
+功能说明 :	登陆之后返回数据，正常情况下返回一个用户信息即可，
+*/
+struct ST_MsgSettingStudentIP
+{
+	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
+	char arrClient[MAX_STUDENT_CLIENT][16];	// 默认最大MAX_STUDENT_CLIENT个客户端
+	int			nSize;
+
+	ST_MsgSettingStudentIP()
+	{
+		stMsgHead.msgType = eMsgSettingStudentIP;
+		nSize = 0;
+	}
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 #pragma endregion 数据交互用的结构体

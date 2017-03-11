@@ -33,6 +33,10 @@ public:
 	void UserReg(DWORD dwID, void* vParam);
 	// 登陆
 	void UserLogin(DWORD dwID, void* vParam);
+	// 申请获取列表
+	void AskClientList(DWORD dwID, void* vParam);
+	// 教师端点配置
+	void SetStudentClientIP(DWORD dwID, void* vParam);
 
 public:
 	void DisconnectCallBack(DWORD dwID);
@@ -45,11 +49,11 @@ void CMsgHelperMain::Imp::SendRecvMsgToUI(DWORD dwID, ST_MsgHead* stHead, char* 
 {
 	char strID[10] = { 0 };
 	sprintf_s(strID, "<%d>", dwID);
-	m_strToWnd = "SOCKET:";
-	m_strToWnd += strID;
-	m_strToWnd += strBase;
-	m_strToWnd += bSuccess ? "成功" : "失败";
-	SendMessage(m_hWnd, EWND_MSG_SERVER_RECV, (WPARAM)(stHead), (LPARAM)(&m_strToWnd));
+	std::string str = "SOCKET:";
+	str += strID;
+	str += strBase;
+	str += bSuccess ? "成功" : "失败";
+	SendMessage(m_hWnd, EWND_MSG_SERVER_RECV, (WPARAM)(stHead), (LPARAM)(&str));
 }
 
 #pragma region 消息处理
@@ -59,8 +63,9 @@ void CMsgHelperMain::Imp::UserConnect(DWORD dwID, void* vParam)
 	ST_MsgConnect msg;
 	memcpy(&msg, vParam, sizeof(ST_MsgConnect));
 
-	ST_MsgConnectResult msgRes;
-	msgRes.stMsgHead.clientType = msg.stMsgHead.clientType;
+	ST_MsgHead msgRes;
+	msgRes.msgType = eMsgConnectResult;
+	msgRes.clientType = msg.stMsgHead.clientType;
 	// 不同客户端类型，连接成功之后，做不同处理
 	if (msg.stMsgHead.clientType == eTeacher)
 	{
@@ -71,7 +76,7 @@ void CMsgHelperMain::Imp::UserConnect(DWORD dwID, void* vParam)
 		st.eCT = msg.stMsgHead.clientType;
 		m_vecClientInfo.push_back(st);
 
-		msgRes.bSuccess = true;
+		msgRes.clientType = eClientToServerSuccess;
 	}
 	else 
 	{
@@ -80,7 +85,8 @@ void CMsgHelperMain::Imp::UserConnect(DWORD dwID, void* vParam)
 		for (auto& it : m_vecClientInfo)
 		{
 			// 找到IP相同的客户端，改变他的状态信息，并且记录对应的Socket
-			if (!memcmp(it.arrIP, msg.arrIP, 16))
+			int nFlag = strcmp(it.arrIP, msg.arrIP);
+			if (nFlag == 0 && !it.dwSocket && it.eCT == eStudent)
 			{
 				it.dwSocket = dwID;
 				it.eCS = eClientConnect;
@@ -89,9 +95,9 @@ void CMsgHelperMain::Imp::UserConnect(DWORD dwID, void* vParam)
 				break;
 			}
 		}
-		msgRes.bSuccess = bIPinList;
+		msgRes.clientType = bIPinList ? eClientToServerSuccess : eClientToServerError;
 	}
-	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgConnectResult));
+	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgHead));
 
 	SendRecvMsgToUI(dwID, &msg.stMsgHead, "连接", true);
 }
@@ -120,6 +126,15 @@ void CMsgHelperMain::Imp::UserLogin(DWORD dwID, void* vParam)
 
 	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgLoginResult));
 
+	for (auto& it : m_vecClientInfo)
+	{
+		// 找到IP相同的客户端，改变他的状态信息
+		if (dwID == it.dwSocket)
+		{
+			it.eCS = eClientLogin;
+			break;
+		}
+	}
 	SendRecvMsgToUI(dwID, &msg.stMsgHead, "登陆", msgRes.bSuccess);
 }
 
@@ -127,7 +142,6 @@ void CMsgHelperMain::Imp::UserLogin(DWORD dwID, void* vParam)
 void CMsgHelperMain::Imp::DisconnectCallBack(DWORD dwID)
 {
 	// 断开的时候，教师端需要向所有学生端发送消息，并且关闭所有学生端，并且清空服务器列表
-
 	for (auto& it = m_vecClientInfo.begin(); it != m_vecClientInfo.end(); )
 	{
 		if (it->dwSocket == dwID) 
@@ -152,6 +166,51 @@ void CMsgHelperMain::Imp::DisconnectCallBack(DWORD dwID)
 			break;
 		}
 		it++;
+	}
+}
+// 申请获取列表
+void CMsgHelperMain::Imp::AskClientList(DWORD dwID, void* vParam)
+{
+	ST_MsgAskClientListResult msgRes;
+	msgRes.nSize = m_vecClientInfo.size();
+	int nLen = sizeof(ST_ClientInfo);
+	for (int i = 0; i < msgRes.nSize; i++)
+	{
+		memcpy(msgRes.arrClient + i, &m_vecClientInfo.at(i), nLen);
+	}
+	for (auto& it : m_vecClientInfo)
+	{
+		if (it.dwSocket)
+		{
+			CTCPNet::GetInstance().SendToClient(it.dwSocket, &msgRes, sizeof(ST_MsgAskClientListResult));
+		}
+	}
+
+	SendRecvMsgToUI(dwID, (ST_MsgHead*)vParam, "获取客户端列表", true);
+
+}
+// 教师端点配置
+void CMsgHelperMain::Imp::SetStudentClientIP(DWORD dwID, void* vParam)
+{
+	ST_ClientInfo stClientInfo;
+	memcpy(&stClientInfo, &(m_vecClientInfo.at(0)), sizeof(ST_ClientInfo));
+	// 通知所有学生端断开连接
+	DisconnectCallBack(dwID);
+
+	ST_MsgSettingStudentIP msg;
+	memcpy(&msg, vParam, sizeof(ST_MsgSettingStudentIP));
+
+	m_vecClientInfo.clear();
+	m_vecClientInfo.push_back(stClientInfo);
+
+	for (int i = 0; i < msg.nSize; i++)
+	{
+		ST_ClientInfo st;
+		st.dwSocket = 0;
+		st.eCS = eClientDisConnect;
+		st.eCT = eStudent;
+		memcpy(st.arrIP, msg.arrClient[i], 16);
+		m_vecClientInfo.push_back(st);
 	}
 }
 
@@ -222,6 +281,16 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 	case eMsgLogin:	// 登陆消息
 	{
 		m_pImp->UserLogin(dwID, vParam);
+	}
+	break;
+	case eMsgAskClientList:	// 申请获取列表
+	{
+		m_pImp->AskClientList(dwID, &stHead);
+	}
+	break;
+	case eMsgSettingStudentIP:
+	{
+		m_pImp->SetStudentClientIP(dwID, vParam);
 	}
 	break;
 
