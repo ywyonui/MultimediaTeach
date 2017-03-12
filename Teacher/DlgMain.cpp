@@ -32,7 +32,7 @@ void CDlgMain::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_BTN_LOCK, m_btn_lock);
-	DDX_Control(pDX, IDC_BTN_SHOW_DEMO, m_btn_show_demo);
+	DDX_Control(pDX, IDC_BTN_DISPLAY, m_btn_display);
 	DDX_Control(pDX, IDC_BTN_ROLL_CALL, m_btn_roll_call);
 	DDX_Control(pDX, IDC_BTN_ASK, m_btn_ask);
 	DDX_Control(pDX, IDC_BTN_PEN, m_btn_pen);
@@ -49,8 +49,14 @@ BEGIN_MESSAGE_MAP(CDlgMain, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
 	ON_MESSAGE(EWND_MSG_CLIENT_RECV, &CDlgMain::OnServerMsgResult)
-	ON_BN_CLICKED(IDC_BTN_SETTING, &CDlgMain::OnBnClickedBtnSetting)
+	ON_BN_CLICKED(IDC_BTN_SETTING, &CDlgMain::OnBnClickedBtnSetting	
 	ON_BN_CLICKED(IDC_BTN_LOCK, &CDlgMain::OnBnClickedBtnLock)
+	ON_BN_CLICKED(IDC_BTN_DISPLAY, &CDlgMain::OnBnClickedBtnDisplay)
+	ON_BN_CLICKED(IDC_BTN_ROLL_CALL, &CDlgMain::OnBnClickedBtnRollCall)
+	ON_BN_CLICKED(IDC_BTN_ASK, &CDlgMain::OnBnClickedBtnAsk)
+	ON_BN_CLICKED(IDC_BTN_PEN, &CDlgMain::OnBnClickedBtnPen)
+	ON_BN_CLICKED(IDC_BTN_QUESTION, &CDlgMain::OnBnClickedBtnQuestion)
+	ON_BN_CLICKED(IDC_BTN_FILE_TRANS, &CDlgMain::OnBnClickedBtnFileTrans)
 END_MESSAGE_MAP()
 
 
@@ -131,7 +137,7 @@ void CDlgMain::OnSize(UINT nType, int cx, int cy)
 	int nY = 20;
 
 	MoveBtn(m_btn_lock, nX, nY, cx);
-	MoveBtn(m_btn_show_demo, nX, nY, cx);
+	MoveBtn(m_btn_display, nX, nY, cx);
 	MoveBtn(m_btn_roll_call, nX, nY, cx);
 	MoveBtn(m_btn_ask, nX, nY, cx);
 	MoveBtn(m_btn_pen, nX, nY, cx);
@@ -195,7 +201,7 @@ void CDlgMain::UpdateList(WPARAM wParam)
 		CString str;
 		CStringA strA;
 		str.Format(_T("%d"), i + 1);
-		int nRow = m_listCtrl.InsertItem(0, str);
+		int nRow = m_listCtrl.InsertItem(i, str);
 		if (st.arrClient[i].eCT == eTeacher)
 		{
 			str = _T("教师");
@@ -252,6 +258,8 @@ void CDlgMain::MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn)
 }
 
 #pragma endregion
+
+#pragma region 按钮
 // 锁屏
 void CDlgMain::OnBnClickedBtnLock()
 {
@@ -285,3 +293,42 @@ void CDlgMain::OnBnClickedBtnSetting()
 		AskForClientList();
 	}
 }
+
+// 演示
+void CDlgMain::OnBnClickedBtnDisplay()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	
+}
+
+// 点名
+void CDlgMain::OnBnClickedBtnRollCall()
+{
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+// 提问
+void CDlgMain::OnBnClickedBtnAsk()
+{
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+// 教鞭
+void CDlgMain::OnBnClickedBtnPen()
+{
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+// 问题库
+void CDlgMain::OnBnClickedBtnQuestion()
+{
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+// 文件传输
+void CDlgMain::OnBnClickedBtnFileTrans()
+{
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+#pragma endregion 按钮

@@ -19,6 +19,9 @@
     <Filter Include="UI">
       <UniqueIdentifier>{800913f3-49d8-4eba-8739-809df403821c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\演示">
+      <UniqueIdentifier>{bba10ade-e8b8-4710-803f-1e395e78d8ca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

@@ -22,7 +22,7 @@ public:
 
 protected: // 控件
 	CButton m_btn_lock;			// 点击锁屏
-	CButton m_btn_show_demo;	// 点击演示
+	CButton m_btn_display;		// 点击演示
 	CButton m_btn_roll_call;	// 点击点名
 	CButton m_btn_ask;			// 点击提问
 	CButton m_btn_pen;			// 点击教鞭
@@ -69,9 +69,13 @@ protected:
 	// 自定义消息处理
 	afx_msg LRESULT OnServerMsgResult(WPARAM, LPARAM);
 
-
-
-public:
+protected:
 	afx_msg void OnBnClickedBtnSetting();
 	afx_msg void OnBnClickedBtnLock();
+	afx_msg void OnBnClickedBtnDisplay();
+	afx_msg void OnBnClickedBtnRollCall();
+	afx_msg void OnBnClickedBtnAsk();
+	afx_msg void OnBnClickedBtnPen();
+	afx_msg void OnBnClickedBtnQuestion();
+	afx_msg void OnBnClickedBtnFileTrans();
 };

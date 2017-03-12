@@ -209,7 +209,7 @@ void CDlgMain::UpdateList(WPARAM wParam)
 		CString str;
 		CStringA strA;
 		str.Format(_T("%d"), i + 1);
-		int nRow = m_listCtrl.InsertItem(0, str);
+		int nRow = m_listCtrl.InsertItem(i, str);
 		if (st.arrClient[i].eCT == eTeacher)
 		{
 			str = _T("ΩÃ ¶");
