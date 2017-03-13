@@ -15,8 +15,12 @@
 #define new DEBUG_NEW
 #endif
 
+#include "Logic/GDI/GdiClient.h"
+#include "Logic/GDI/GdiServer.h"
 
 // CDlgMain 对话框
+
+#define IDT_GET_SCREEN 101
 
 
 
@@ -48,8 +52,9 @@ BEGIN_MESSAGE_MAP(CDlgMain, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
+	ON_WM_TIMER()
 	ON_MESSAGE(EWND_MSG_CLIENT_RECV, &CDlgMain::OnServerMsgResult)
-	ON_BN_CLICKED(IDC_BTN_SETTING, &CDlgMain::OnBnClickedBtnSetting	
+	ON_BN_CLICKED(IDC_BTN_SETTING, &CDlgMain::OnBnClickedBtnSetting)
 	ON_BN_CLICKED(IDC_BTN_LOCK, &CDlgMain::OnBnClickedBtnLock)
 	ON_BN_CLICKED(IDC_BTN_DISPLAY, &CDlgMain::OnBnClickedBtnDisplay)
 	ON_BN_CLICKED(IDC_BTN_ROLL_CALL, &CDlgMain::OnBnClickedBtnRollCall)
@@ -153,6 +158,21 @@ void CDlgMain::OnSize(UINT nType, int cx, int cy)
 		m_listCtrl.MoveWindow(20, nY, nW, nH);
 	}
 
+}
+
+
+void CDlgMain::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	if (nIDEvent == IDT_GET_SCREEN)
+	{
+		ST_MsgCommand st;
+		st.stMsgHead.msgType = eMsgDisplay;
+		st.nSubType = 0;	// 初始化，通知客户端，准备接收数据
+		st.nLen = 0;
+		CTCPNet::GetInstance().SendToServer(&st, sizeof(ST_MsgCommand));
+	}
+	CDialogEx::OnTimer(nIDEvent);
 }
 
 
@@ -298,7 +318,25 @@ void CDlgMain::OnBnClickedBtnSetting()
 void CDlgMain::OnBnClickedBtnDisplay()
 {
 	// TODO:  在此添加控件通知处理程序代码
-	
+
+	CString strText;
+	GetDlgItem(IDC_BTN_DISPLAY)->GetWindowText(strText);
+
+	if (strText == _T("演示"))
+	{
+		// 1、初始化屏幕数据采集服务器
+		CGdiServer::GetInstance().InitDisplay(GetSafeHwnd(), CMsgHelperMain::GetInstance().GetSocket());
+
+		// 2、将屏幕初始化数据传递给服务器，让服务器通知客户端创建显示窗口和对应的初始化显示数据
+		CGdiServer::GetInstance().SendResolution();
+
+		// 3、启动定时器，向服务器传输桌面数据
+		SetTimer(IDT_GET_SCREEN, 100, NULL);
+	}
+	else
+	{
+		KillTimer(IDT_GET_SCREEN);
+	}
 }
 
 // 点名
@@ -332,3 +370,14 @@ void CDlgMain::OnBnClickedBtnFileTrans()
 }
 
 #pragma endregion 按钮
+
+
+BOOL CDlgMain::DestroyWindow()
+{
+	// TODO:  在此添加专用代码和/或调用基类
+
+	// 销毁屏幕数据采集服务器
+	CGdiServer::GetInstance().ExitDisplay();
+
+	return CDialogEx::DestroyWindow();
+}

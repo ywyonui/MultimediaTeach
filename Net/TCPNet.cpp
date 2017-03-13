@@ -359,7 +359,7 @@ DWORD WINAPI CTCPNet::ClientWorkerThread(void* vParam)
 		}
 		if (pMsgHelper)
 		{
-			pMsgHelper->NetMsgCallBack(0, szBuff, nLen);
+			pMsgHelper->NetMsgCallBack(GetInstance().m_ClientSocket, szBuff, nLen);
 		}
 	}
 

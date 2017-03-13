@@ -64,6 +64,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 	// 自定义消息处理
@@ -78,4 +79,6 @@ protected:
 	afx_msg void OnBnClickedBtnPen();
 	afx_msg void OnBnClickedBtnQuestion();
 	afx_msg void OnBnClickedBtnFileTrans();
+public:
+	virtual BOOL DestroyWindow();
 };

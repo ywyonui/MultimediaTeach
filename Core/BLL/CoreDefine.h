@@ -57,6 +57,9 @@ enum EMsgType
 
 	eMsgLockScreen,			// 锁屏消息
 	eMsgUnLockScreen,		// 解锁消息
+
+	eMsgDisplay,			// 演示
+
 	eMsgSettingStudentIP,	// 配置
 };
 
@@ -234,6 +237,20 @@ struct ST_MsgAskClientListResult
 		stMsgHead.msgType = eMsgAskClientListResult;
 		nSize = 0;
 	}
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+类    型 :	未定义类型消息
+功能说明 :	不知道具体的类型
+*/
+struct  ST_MsgCommand
+{
+	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
+	int			nSubType;	// 定义子类型，用于区分同一组消息中，不同步骤类型的功能
+	int			nLen;		// 后面的Message长度
+	char		pBuffer[0];
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////

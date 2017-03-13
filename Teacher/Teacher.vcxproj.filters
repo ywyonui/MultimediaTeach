@@ -19,8 +19,8 @@
     <Filter Include="UI">
       <UniqueIdentifier>{800913f3-49d8-4eba-8739-809df403821c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="UI\演示">
-      <UniqueIdentifier>{bba10ade-e8b8-4710-803f-1e395e78d8ca}</UniqueIdentifier>
+    <Filter Include="Logic\GDI">
+      <UniqueIdentifier>{42767e06-00b3-4cc1-9c40-1f173756864c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +54,21 @@
     <ClInclude Include="UI\DlgSetting.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="Logic\GDI\GdiClient.h">
+      <Filter>Logic\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="Logic\GDI\GdiServer.h">
+      <Filter>Logic\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="Logic\GDI\HuffCompress.h">
+      <Filter>Logic\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="Logic\GDI\RLE.h">
+      <Filter>Logic\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\DlgDisplay.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Teacher.cpp">
@@ -75,6 +90,21 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="UI\DlgSetting.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Logic\GDI\GdiClient.cpp">
+      <Filter>Logic\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="Logic\GDI\GdiServer.cpp">
+      <Filter>Logic\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="Logic\GDI\HuffCompress.cpp">
+      <Filter>Logic\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="Logic\GDI\RLE.cpp">
+      <Filter>Logic\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\DlgDisplay.cpp">
       <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>

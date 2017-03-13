@@ -8,6 +8,8 @@ using namespace std;
 
 
 CMsgHelperMain::CMsgHelperMain()
+	: m_dwSocket(NULL)
+	, m_hWnd(NULL)
 {
 }
 
@@ -41,6 +43,7 @@ CMsgHelperMain& CMsgHelperMain::GetInstance(void)
 *************************************************************/
 void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 {
+	m_dwSocket = dwID;
 	ST_MsgHead stHead;
 	memcpy(&stHead, vParam, sizeof(ST_MsgHead));
 	switch (stHead.msgType)
@@ -80,6 +83,11 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, (WPARAM)&msg, eMsgAskClientListResult);
 	}
 	break;
+	case eMsgDisplay:	// 获取列表返回消息
+	{
+
+	}
+	break;
 	}
 }
 
@@ -115,6 +123,17 @@ HWND CMsgHelperMain::GetHwnd(void)
 {
 	return m_hWnd;
 }
+/*************************************************************
+函数名称:	GetSocket()
+参数说明:	void
+返 回 值:
+功能说明:	返回Socket，用于外部直接进行数据交互
+*************************************************************/
+DWORD CMsgHelperMain::GetSocket(void)
+{
+	return m_dwSocket;
+}
+
 #pragma endregion 公共接口
 
 

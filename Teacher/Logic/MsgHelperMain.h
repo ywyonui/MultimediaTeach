@@ -29,6 +29,7 @@ public:
 #pragma region 私有变量
 private:
 	HWND	m_hWnd;
+	DWORD	m_dwSocket;
 #pragma endregion 私有变量
 
 
@@ -75,6 +76,14 @@ public:
 	功能说明:	返回关联窗口
 	*************************************************************/
 	HWND GetHwnd(void);
+
+	/*************************************************************
+	函数名称:	GetSocket()
+	参数说明:	void
+	返 回 值:	
+	功能说明:	返回Socket，用于外部直接进行数据交互
+	*************************************************************/
+	DWORD GetSocket(void);
 #pragma endregion 公共接口
 
 
