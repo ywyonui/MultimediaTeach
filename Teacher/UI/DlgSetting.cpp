@@ -152,7 +152,7 @@ void CDlgSetting::SaveSettingToConfig()
 	
 	ST_MsgSettingStudentIP msg;
 	msg.nSize = m_nIPCount;
-	msg.stMsgHead.clientType = eTeacher;
+	msg.stMsgHead.nSubType = eTeacher;
 	
 	for (int i = 0; i < m_nIPCount; i++)
 	{

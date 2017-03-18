@@ -39,7 +39,7 @@ public:
 	void SetStudentClientIP(DWORD dwID, void* vParam);
 
 	// 纯粹的消息转发
-	void SendMessageToStudent(EMsgType msgType);
+	void TransmitMessageToClient(ST_MsgHead& msg, DWORD dwID = 0);
 
 public:
 	void DisconnectCallBack(DWORD dwID);
@@ -68,18 +68,18 @@ void CMsgHelperMain::Imp::UserConnect(DWORD dwID, void* vParam)
 
 	ST_MsgHead msgRes;
 	msgRes.msgType = eMsgConnectResult;
-	msgRes.clientType = msg.stMsgHead.clientType;
+	msgRes.nSubType = msg.stMsgHead.nSubType;
 	// 不同客户端类型，连接成功之后，做不同处理
-	if (msg.stMsgHead.clientType == eTeacher)
+	if (msg.stMsgHead.nSubType == eTeacher)
 	{
 		ST_ClientInfo st;
 		st.dwSocket = dwID;
 		memcpy(st.arrIP, msg.arrIP, 16);
 		st.eCS = eClientConnect;
-		st.eCT = msg.stMsgHead.clientType;
+		st.eCT = msg.stMsgHead.nSubType;
 		m_vecClientInfo.push_back(st);
 
-		msgRes.clientType = eClientToServerSuccess;
+		msgRes.nSubType = 0;
 	}
 	else 
 	{
@@ -93,12 +93,12 @@ void CMsgHelperMain::Imp::UserConnect(DWORD dwID, void* vParam)
 			{
 				it.dwSocket = dwID;
 				it.eCS = eClientConnect;
-				it.eCT = msg.stMsgHead.clientType;
+				it.eCT = msg.stMsgHead.nSubType;
 				bIPinList = true;
 				break;
 			}
 		}
-		msgRes.clientType = bIPinList ? eClientToServerSuccess : eClientToServerError;
+		msgRes.nSubType = bIPinList ? 0 : -1;
 	}
 	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgHead));
 
@@ -111,8 +111,8 @@ void CMsgHelperMain::Imp::UserReg(DWORD dwID, void* vParam)
 	memcpy(&msg, vParam, sizeof(ST_MsgReg));
 	ST_MsgRegResult msgRes;
 	msgRes.stMsgHead.msgType = eMsgRegResult;
-	msgRes.stMsgHead.clientType = msg.stMsgHead.clientType;
-	msgRes.bSuccess = CUserMgr::GetInstance().RegUser(msg.stRegInfo, msg.stMsgHead.clientType);
+	msgRes.stMsgHead.nSubType = msg.stMsgHead.nSubType;
+	msgRes.bSuccess = CUserMgr::GetInstance().RegUser(msg.stRegInfo, msg.stMsgHead.nSubType);
 	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgRegResult));
 
 	SendRecvMsgToUI(dwID, &msg.stMsgHead, "注册", msgRes.bSuccess);
@@ -124,8 +124,8 @@ void CMsgHelperMain::Imp::UserLogin(DWORD dwID, void* vParam)
 	memcpy(&msg, vParam, sizeof(ST_MsgLogin));
 	ST_MsgLoginResult msgRes;
 	msgRes.stMsgHead.msgType = eMsgLoginResult;
-	msgRes.stMsgHead.clientType = msg.stMsgHead.clientType;
-	msgRes.bSuccess = CUserMgr::GetInstance().Login(msg.stLoginInfo, msg.stMsgHead.clientType);
+	msgRes.stMsgHead.nSubType = msg.stMsgHead.nSubType;
+	msgRes.bSuccess = CUserMgr::GetInstance().Login(msg.stLoginInfo, msg.stMsgHead.nSubType);
 
 	CTCPNet::GetInstance().SendToClient(dwID, &msgRes, sizeof(ST_MsgLoginResult));
 
@@ -220,16 +220,13 @@ void CMsgHelperMain::Imp::SetStudentClientIP(DWORD dwID, void* vParam)
 	}
 }
 // 锁屏
-void CMsgHelperMain::Imp::SendMessageToStudent(EMsgType msgType)
+void CMsgHelperMain::Imp::TransmitMessageToClient(ST_MsgHead& msg, DWORD dwID)
 {
-	ST_MsgHead msgRes;
-	msgRes.clientType = eStudent;
-	msgRes.msgType = msgType;
 	for (auto& it : m_vecClientInfo)
 	{
-		if (it.eCT == eStudent && it.dwSocket)
+		if (it.dwSocket != dwID && it.dwSocket)
 		{
-			CTCPNet::GetInstance().SendToClient(it.dwSocket, &msgRes, sizeof(ST_MsgAskClientListResult));
+			CTCPNet::GetInstance().SendToClient(it.dwSocket, &msg, sizeof(ST_MsgHead));
 		}
 	}
 }
@@ -314,14 +311,11 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		m_pImp->SetStudentClientIP(dwID, vParam);
 	}
 	break;
-	case eMsgLockScreen:
-	case eMsgUnLockScreen:
+	default:	// 默认的转发给非消息源的所有其他客户端
 	{
-		m_pImp->SendMessageToStudent(stHead.msgType);
+		m_pImp->TransmitMessageToClient(stHead, dwID);
 	}
 	break;
-	default:
-		break;
 	}
 }
 

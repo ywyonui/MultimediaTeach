@@ -533,3 +533,4 @@ DWORD RunLengthDecode(BYTE *pInput,BYTE *pOutput)
 	// Return the Count of Uncompressed Data
 	return dwCount;
 }
+

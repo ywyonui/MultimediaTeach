@@ -1,13 +1,26 @@
 #include "stdafx.h"
 #include <windows.h>
 #include "GdiServer.h"
-#include "GdiClient.h"
 #include "HuffCompress.h"
+#include "GdiCommon.h"
 #include "RLE.h"
 #include "cstdio"
 #include "cstdlib"
 
+#define SETFLAGS			XP1_GUARANTEED_DELIVERY|XP1_GUARANTEED_ORDER
+#define NOTSETFLAGS			XP1_CONNECTIONLESS
+#define	LPBMIH				LPBITMAPINFOHEADER
+
+// 这个结构用来在LPARAM参数中传递信息到客户端线程
+struct	ST_GdiThreadParam
+{
+	SOCKET	Socket;
+	void*	pGdiServer;
+};
+
+
 CGdiServer::CGdiServer()
+	: m_nPort(1243)
 {
 
 }
@@ -17,107 +30,282 @@ CGdiServer::~CGdiServer()
 
 }
 
-// 添加一个元素到GDI链表
-
+#pragma region 外部调用
 CGdiServer& CGdiServer::GetInstance()
 {
 	static CGdiServer hInstance;
 	return hInstance;
 }
 
-struct GdiServerList*	CGdiServer::Add_Gdi(struct GdiServerList *pNode, struct GdiServerDS Gdi)
+
+bool CGdiServer::Init(HWND hWnd)
 {
-	// 添加到链表的末尾
-	if (pNode->pNext = (struct GdiServerList *)malloc(sizeof(struct GdiServerList)))
-	{
-		pNode = pNode->pNext;
+	m_hWnd = hWnd;
 
-		// 添加网格坐标
-		pNode->Gdi.iGridX = Gdi.iGridX;
-		pNode->Gdi.iGridY = Gdi.iGridY;
+	InitServer();
 
-		// 设置区域的矩形坐标
-		pNode->Gdi.iWidth1 = Gdi.iWidth1;
-		pNode->Gdi.iWidth2 = Gdi.iWidth2;
-		pNode->Gdi.iHeight1 = Gdi.iHeight1;
-		pNode->Gdi.iHeight2 = Gdi.iHeight2;
+	InitDisplay();
 
-		// 设置DIB颜色表的颜色数
-		pNode->Gdi.nColors = Gdi.nColors;
-
-		// 设置DIB信息头的字节数
-		pNode->Gdi.dwBitMapHeader = Gdi.dwBitMapHeader;
-
-		// 设置位图长度和起始坐标
-		pNode->Gdi.dwLen = Gdi.dwLen;
-		pNode->Gdi.dwCompress = Gdi.dwCompress;
-		pNode->Gdi.iStartPos = Gdi.iStartPos;
-
-		//设置DIB
-		pNode->Gdi.DIBitmap = Gdi.DIBitmap;
-
-		// 设置DIB信息头
-		pNode->Gdi.BMIH = Gdi.BMIH;
-
-		// 设置DIB信息头的指针
-		pNode->Gdi.lpBMIH = Gdi.lpBMIH;
-
-		// 设置区域的装置设备句柄
-		pNode->Gdi.hMemDC = Gdi.hMemDC;
-
-		// 设置区域的位图句柄
-		pNode->Gdi.hDIBitmap = Gdi.hDIBitmap;
-
-		// 区域无压缩DIB的指针
-		pNode->Gdi.pDIB = Gdi.pDIB;
-
-		//设置指向区域DIB变化的部分的指针
-		pNode->Gdi.pDIBChange = Gdi.pDIBChange;
-
-		//设置指向压缩区域的DIB的指针
-		pNode->Gdi.pDIBCompress = Gdi.pDIBCompress;
-
-		//设置指向全局区域位图指针
-		pNode->Gdi.pDIBitmap = Gdi.pDIBitmap;
-
-		// 区域位图标志
-		pNode->Gdi.fDIBitmap = Gdi.fDIBitmap;
-		pNode->Gdi.fChange = Gdi.fChange;
-
-		pNode->pNext = NULL;
-		return pNode;
-	}
-	return NULL;
+	return true;
 }
 
-// 完全清楚GDI链表
-void CGdiServer::Clear_Gdi(struct GdiServerList *pStart)
+void CGdiServer::Exit()
 {
-	struct	GdiServerList	*pPrev;
-	struct	GdiServerList	*pNode;
-	while (pNode = pStart->pNext)
+
+}
+
+// 发送Resolution到客户端，分两次把宽高发给客户端
+void CGdiServer::SendResolution(DWORD dwClientSocket)
+{
+	char	szMessage[81];
+	DWORD	iSent, iRecv;
+
+	// 建立屏幕宽度
+	memset(szMessage, '\0', sizeof(szMessage));
+	sprintf_s(szMessage, "%d", iWidth);
+	iSent = Transmit(dwClientSocket, (BYTE*)szMessage, strlen(szMessage));
+
+	// 接收确认
+	memset(szMessage, '\0', sizeof(szMessage));
+	iRecv = recv(m_dwSocket, szMessage, 81, 0);
+	szMessage[iRecv] = '\0';
+
+	// 建立屏幕的高度
+	memset(szMessage, '\0', sizeof(szMessage));
+	sprintf_s(szMessage, "%d", iHeight);
+	iSent = Transmit(dwClientSocket, (BYTE*)szMessage, strlen(szMessage));
+
+	// 接收确认
+	memset(szMessage, '\0', sizeof(szMessage));
+	iRecv = recv(m_dwSocket, szMessage, 81, 0);
+	szMessage[iRecv] = '\0';
+
+}
+
+// 通过socket发送区域显示位图
+int CGdiServer::SendRegionDisplay(DWORD dwClientSocket)
+{
+	char	szMessage[81];
+	DWORD	iSent, iRecv;
+	int		fSend = FALSE;
+	int		iUpdates;
+	WORD	wTreeSize;
+	DWORD	dwByteTree[768];
+	DWORD	dwCodes[514];
+	DWORD	dwCompLen, dwLastCompLen;
+	BOOL	fTransmit;
+	BYTE	*pTempDIB;
+	DWORD	dwMinCompress;
+
+	// 指向GDI链表的起始位
+	iUpdates = 0;
+	pGdiNode = GdiStart.pNext;
+	while (pGdiNode)
 	{
-		pPrev = pStart;
-		pPrev->pNext = pNode->pNext;
-		DeleteDC(pNode->Gdi.hMemDC);
-		DeleteObject(pNode->Gdi.hDIBitmap);
-		if (pNode->Gdi.fDIBitmap)
-		{
-			free(pNode->Gdi.pDIBitmap);
-			free(pNode->Gdi.pDIB);
-			free(pNode->Gdi.pDIBChangeStart);
-		}
-		free(pNode);
+		//为每个网格得到区域显示
+		fSend = GetRegionDisplay();
+		// 计算需要发送的变化的显示区域的数目
+		if (fSend)
+			iUpdates++;
+		// 移动到下一个节点
+		pGdiNode = pGdiNode->pNext;
 	}
+
+	// 发送到客户端需要更新的显示区域的数目
+	memset(szMessage, '\0', sizeof(szMessage));
+	sprintf_s(szMessage, "%d", iUpdates);
+	iSent = Transmit(dwClientSocket, (BYTE*)szMessage, strlen(szMessage));
+
+	// 接收确认
+	memset(szMessage, '\0', sizeof(szMessage));
+	iRecv = recv(m_dwSocket, szMessage, 81, 0);
+	szMessage[iRecv] = '\0';
+
+	if (iUpdates > 0)
+	{
+		// 指向GDI链表的起始位
+		pGdiNode = GdiStart.pNext;
+		while (pGdiNode)
+		{
+			// 如果桌面发生了变化，则发送DIB
+			if (pGdiNode->Gdi.fChange)
+			{
+				int		iCompressions = 1;
+				//无压缩
+#pragma region 压缩
+				if (iCompressionLevel == 0)
+				{
+					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(pGdiNode->Gdi.dwCompress);
+					memblast(pGdiNode->Gdi.pDIBCompress, pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress);
+					dwSendLen = pGdiNode->Gdi.dwCompress;
+				}
+				if (iCompressionLevel == 10) // 单遍霍夫曼编码压缩
+				{
+					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(pGdiNode->Gdi.dwCompress + 1536);
+					// 生成霍夫曼字节树字典
+					wTreeSize = HuffmanDictionary(pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress, &dwByteTree[0], &dwCodes[0]);
+					// 使用霍夫曼压缩方法压缩图片
+					dwSendLen = HuffmanCompress(pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress, wTreeSize, &dwByteTree[0], &dwCodes[0], pGdiNode->Gdi.pDIBCompress);
+				}
+				else if (iCompressionLevel == 11) // 多遍霍夫曼压缩编码
+				{
+					dwMinCompress = pGdiNode->Gdi.dwCompress + 1536;
+					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(dwMinCompress);
+					pTempDIB = (BYTE *)malloc(pGdiNode->Gdi.dwCompress);
+					memblast(pTempDIB, pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress);
+					iCompressions = 0;
+					dwCompLen = pGdiNode->Gdi.dwCompress;
+					dwLastCompLen = dwCompLen;
+					for (;;)
+					{
+						// 生成霍夫曼字节树字典
+						wTreeSize = HuffmanDictionary(pTempDIB, pGdiNode->Gdi.dwCompress, &dwByteTree[0], &dwCodes[0]);
+						// 计算压缩长度
+						dwCompLen = HuffmanCountCompress(pTempDIB, dwCompLen, wTreeSize, &dwCodes[0]);
+						if (dwCompLen < dwMinCompress)
+						{
+							dwSendLen = HuffmanCompress(pTempDIB, dwLastCompLen, wTreeSize, &dwByteTree[0], &dwCodes[0], pGdiNode->Gdi.pDIBCompress);
+							memblast(pTempDIB, pGdiNode->Gdi.pDIBCompress, dwSendLen);
+							dwMinCompress = dwSendLen;
+							dwLastCompLen = dwCompLen;
+							iCompressions++;
+						}
+						else
+							break;
+					}
+					free(pTempDIB);
+				}
+				else if (iCompressionLevel == 12) // Run Length编码
+				{
+					//为最坏的情况分配压缩空间
+					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(pGdiNode->Gdi.dwCompress * 3 + 4);
+					// Run Length编码图象
+					dwSendLen = RunLengthEncode(pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress, pGdiNode->Gdi.pDIBCompress);
+				}
+				else if (iCompressionLevel == 13) // Run Length&Huffman编码
+				{
+					pTempDIB = (BYTE *)malloc(pGdiNode->Gdi.dwCompress * 3 + 4);
+					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(pGdiNode->Gdi.dwCompress * 3 + 4);
+					// Run Length 编码图象
+					dwCompLen = RunLengthEncode(pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress, pTempDIB);
+					// 生成霍夫曼字节树的字典
+					wTreeSize = HuffmanDictionary(pTempDIB, dwCompLen, &dwByteTree[0], &dwCodes[0]);
+					// 使用霍夫曼压缩Run Lenght编码的图象
+					dwSendLen = HuffmanCompress(pTempDIB, dwCompLen, wTreeSize, &dwByteTree[0], &dwCodes[0], pGdiNode->Gdi.pDIBCompress);
+					// 释放临时的DIB
+					free(pTempDIB);
+				}
+#pragma endregion 压缩
+
+				// 建立位图控制消息
+				memset(szMessage, '\0', sizeof(szMessage));
+				sprintf_s(szMessage, "%d;%d;%d;%ld;%ld;%ld;",
+					iCompressions,
+					pGdiNode->Gdi.iGridX, pGdiNode->Gdi.iGridY,
+					pGdiNode->Gdi.iStartPos,
+					pGdiNode->Gdi.dwCompress, dwSendLen);
+				// 发送控制消息
+				iSent = Transmit(dwClientSocket, (BYTE*)szMessage, strlen(szMessage));
+
+				// 接收确认
+				memset(szMessage, '\0', sizeof(szMessage));
+				iRecv = recv(m_dwSocket, szMessage, 81, 0);
+				szMessage[iRecv] = '\0';
+
+				// 发送压缩的DIB
+				fTransmit = Transmit(dwClientSocket, pGdiNode->Gdi.pDIBCompress, dwSendLen);
+
+				// 释放压缩的DIB
+				free(pGdiNode->Gdi.pDIBCompress);
+				// 接收确认
+				memset(szMessage, '\0', sizeof(szMessage));
+				iRecv = recv(m_dwSocket, szMessage, 81, 0);
+				szMessage[iRecv] = '\0';
+			}
+			pGdiNode = pGdiNode->pNext;
+		}
+	}
+	return iUpdates;
+}
+#pragma endregion 外部调用
+
+
+#pragma region 内部实现
+
+// 初始化数据采集服务器
+bool CGdiServer::InitServer()
+{
+	// 协议变量
+	LPBYTE				pBuf;
+	WSAPROTOCOL_INFO	Protocol;
+	int					nRet;
+	int					nZero = 0;
+	HANDLE	hThread = NULL;
+	DWORD	dwThreadId = 0;
+
+	// 为协议的选择和所有协议的变量决定需要的缓冲区的大小
+	dwLen = 0;
+	nRet = WSAEnumProtocols(NULL, NULL, &dwLen);
+	if (nRet == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSAENOBUFS)
+			return false;
+	}
+	pBuf = (LPBYTE)malloc(dwLen);
+	// 为WSASocketGet()得到协议
+	nRet = SelectProtocols(SETFLAGS, NOTSETFLAGS, (LPWSAPROTOCOL_INFO)pBuf, &dwLen, &Protocol);
+
+	// 创建我们的监听socket
+	m_dwListen = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_IP, NULL, 0, SOCK_STREAM);
+	if (m_dwListen == SOCKET_ERROR)
+	{
+	//	sprintf(szString, "socket() failed: %d", WSAGetLastError());
+	//	MessageBox(NULL, szString, "Remote Server", MB_OK);
+		return false;
+	}
+
+	// 设置server端信息
+	m_addrServer.sin_addr.s_addr = htonl(INADDR_ANY);
+	m_addrServer.sin_family = AF_INET;
+	m_addrServer.sin_port = htons(m_nPort);
+
+	// 绑定到socket
+	if (bind(m_dwListen, (struct sockaddr *)&m_addrServer, sizeof(m_addrServer)) == SOCKET_ERROR)
+	{
+	//	sprintf(szString, "bind() failed: %d\n", WSAGetLastError());
+	//	MessageBox(NULL, szString, "Remote Server", MB_OK);
+		return false;
+	}
+
+	//为了减小CPU的利用率，禁止在socket上将数据发送到缓冲。设置SO_SNDBUF为0,
+	//从而使winsock直接发送数据到客户端，而不是将数据缓冲才发送。
+	nZero = 0;
+	setsockopt(m_dwListen, SOL_SOCKET, SO_SNDBUF, (char *)&nZero, sizeof(nZero));
+	//开始监听
+	listen(m_dwListen, SOMAXCONN);
+
+
+	hThread = CreateThread(NULL, 0, ListenThread, this, 0, &dwThreadId);
+	if (hThread)
+	{
+		//关闭线程句柄
+		CloseHandle(hThread);
+	}
+
+	return true;
+}
+
+// 退出数据采集服务器
+void CGdiServer::ExitServer()
+{
+
 }
 
 
 // 初始化显示变量
-void CGdiServer::InitDisplay(HWND hWnd, DWORD dwSocket)
+void CGdiServer::InitDisplay()
 {
-	m_dwSocket = dwSocket;
-
-	struct	GdiServerDS	Gdi;
+	struct	ST_GdiServerDS	Gdi;
 	int		iWidthX, iHeightY, nGrid;
 	int		iXGrid, iYGrid, iLoop;
 
@@ -211,16 +399,15 @@ void CGdiServer::InitDisplay(HWND hWnd, DWORD dwSocket)
 	hNullDC = GetDC(NULL);
 }
 
-
 void CGdiServer::ExitDisplay()
 {
 	DeleteDC(hDDC);
 	DeleteDC(hNullDC);
-	Clear_Gdi(pGdiNode);
+	Clear_Gdi();
 }
 
 //得到区域的显示位图
-int CGdiServer::GetRegionDisplay(HWND hWnd)
+int CGdiServer::GetRegionDisplay()
 {
 	int		iWidth1, iWidth2, iHeight1, iHeight2;
 	BOOL	bGotBits;
@@ -376,182 +563,8 @@ int CGdiServer::GetRegionDisplay(HWND hWnd)
 	return pGdiNode->Gdi.fChange;
 }
 
-// 发送Resolution到客户端，分两次把宽高发给客户端
-void CGdiServer::SendResolution()
-{
-	char	szMessage[81];
-	DWORD	iSent, iRecv;
-
-	// 建立屏幕宽度
-	memset(szMessage, '\0', sizeof(szMessage));
-	sprintf_s(szMessage, "%d", iWidth);
-	iSent = Transmit((BYTE*)szMessage, strlen(szMessage));
-
-	// 接收确认
-	memset(szMessage, '\0', sizeof(szMessage));
-	iRecv = recv(m_dwSocket, szMessage, 81, 0);
-	szMessage[iRecv] = '\0';
-
-	// 建立屏幕的高度
-	memset(szMessage, '\0', sizeof(szMessage));
-	sprintf_s(szMessage, "%d", iHeight);
-	iSent = Transmit((BYTE*)szMessage, strlen(szMessage));
-
-	// 接收确认
-	memset(szMessage, '\0', sizeof(szMessage));
-	iRecv = recv(m_dwSocket, szMessage, 81, 0);
-	szMessage[iRecv] = '\0';
-
-}
-
-// 通过socket发送区域显示位图
-int CGdiServer::SendRegionDisplay(HWND hWnd)
-{
-	char	szMessage[81];
-	DWORD	iSent, iRecv;
-	int		fSend = FALSE;
-	int		iUpdates;
-	WORD	wTreeSize;
-	DWORD	dwByteTree[768];
-	DWORD	dwCodes[514];
-	DWORD	dwCompLen, dwLastCompLen;
-	BOOL	fTransmit;
-	BYTE	*pTempDIB;
-	DWORD	dwMinCompress;
-
-	// 指向GDI链表的起始位
-	iUpdates = 0;
-	pGdiNode = GdiStart.pNext;
-	while (pGdiNode)
-	{
-		//为每个网格得到区域显示
-		fSend = GetRegionDisplay(hWnd);
-		// 计算需要发送的变化的显示区域的数目
-		if (fSend)
-			iUpdates++;
-		// 移动到下一个节点
-		pGdiNode = pGdiNode->pNext;
-	}
-
-	// 发送到客户端需要更新的显示区域的数目
- 	memset(szMessage, '\0', sizeof(szMessage));
- 	sprintf_s(szMessage, "%d", iUpdates);
- 	iSent = Transmit((BYTE*)szMessage, strlen(szMessage));
-
- 	// 接收确认
- 	memset(szMessage, '\0', sizeof(szMessage));
- 	iRecv = recv(m_dwSocket, szMessage, 81, 0);
- 	szMessage[iRecv] = '\0';
-
-	if (iUpdates > 0)
-	{
-		// 指向GDI链表的起始位
-		pGdiNode = GdiStart.pNext;
-		while (pGdiNode)
-		{
-			// 如果桌面发生了变化，则发送DIB
-			if (pGdiNode->Gdi.fChange)
-			{
-				int		iCompressions = 1;
-				//无压缩
-#pragma region 压缩
-				if (iCompressionLevel == 0)
-				{
-					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(pGdiNode->Gdi.dwCompress);
-					memblast(pGdiNode->Gdi.pDIBCompress, pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress);
-					dwSendLen = pGdiNode->Gdi.dwCompress;
-				}
-				if (iCompressionLevel == 10) // 单遍霍夫曼编码压缩
-				{
-					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(pGdiNode->Gdi.dwCompress + 1536);
-					// 生成霍夫曼字节树字典
-					wTreeSize = HuffmanDictionary(pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress, &dwByteTree[0], &dwCodes[0]);
-					// 使用霍夫曼压缩方法压缩图片
-					dwSendLen = HuffmanCompress(pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress, wTreeSize, &dwByteTree[0], &dwCodes[0], pGdiNode->Gdi.pDIBCompress);
-				}
-				else if (iCompressionLevel == 11) // 多遍霍夫曼压缩编码
-				{
-					dwMinCompress = pGdiNode->Gdi.dwCompress + 1536;
-					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(dwMinCompress);
-					pTempDIB = (BYTE *)malloc(pGdiNode->Gdi.dwCompress);
-					memblast(pTempDIB, pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress);
-					iCompressions = 0;
-					dwCompLen = pGdiNode->Gdi.dwCompress;
-					dwLastCompLen = dwCompLen;
-					for (;;)
-					{
-						// 生成霍夫曼字节树字典
-						wTreeSize = HuffmanDictionary(pTempDIB, pGdiNode->Gdi.dwCompress, &dwByteTree[0], &dwCodes[0]);
-						// 计算压缩长度
-						dwCompLen = HuffmanCountCompress(pTempDIB, dwCompLen, wTreeSize, &dwCodes[0]);
-						if (dwCompLen < dwMinCompress)
-						{
-							dwSendLen = HuffmanCompress(pTempDIB, dwLastCompLen, wTreeSize, &dwByteTree[0], &dwCodes[0], pGdiNode->Gdi.pDIBCompress);
-							memblast(pTempDIB, pGdiNode->Gdi.pDIBCompress, dwSendLen);
-							dwMinCompress = dwSendLen;
-							dwLastCompLen = dwCompLen;
-							iCompressions++;
-						}
-						else
-							break;
-					}
-					free(pTempDIB);
-				}
-				else if (iCompressionLevel == 12) // Run Length编码
-				{
-					//为最坏的情况分配压缩空间
-					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(pGdiNode->Gdi.dwCompress * 3 + 4);
-					// Run Length编码图象
-					dwSendLen = RunLengthEncode(pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress, pGdiNode->Gdi.pDIBCompress);
-				}
-				else if (iCompressionLevel == 13) // Run Length&Huffman编码
-				{
-					pTempDIB = (BYTE *)malloc(pGdiNode->Gdi.dwCompress * 3 + 4);
-					pGdiNode->Gdi.pDIBCompress = (BYTE *)malloc(pGdiNode->Gdi.dwCompress * 3 + 4);
-					// Run Length 编码图象
-					dwCompLen = RunLengthEncode(pGdiNode->Gdi.pDIBChange, pGdiNode->Gdi.dwCompress, pTempDIB);
-					// 生成霍夫曼字节树的字典
-					wTreeSize = HuffmanDictionary(pTempDIB, dwCompLen, &dwByteTree[0], &dwCodes[0]);
-					// 使用霍夫曼压缩Run Lenght编码的图象
-					dwSendLen = HuffmanCompress(pTempDIB, dwCompLen, wTreeSize, &dwByteTree[0], &dwCodes[0], pGdiNode->Gdi.pDIBCompress);
-					// 释放临时的DIB
-					free(pTempDIB);
-				}
-#pragma endregion 压缩
-
-				// 建立位图控制消息
-				memset(szMessage, '\0', sizeof(szMessage));
-				sprintf_s(szMessage, "%d;%d;%d;%ld;%ld;%ld;",
-					iCompressions,
-					pGdiNode->Gdi.iGridX, pGdiNode->Gdi.iGridY,
-					pGdiNode->Gdi.iStartPos,
-					pGdiNode->Gdi.dwCompress, dwSendLen);
-				// 发送控制消息
-				iSent = Transmit((BYTE*)szMessage, strlen(szMessage));
-
-				// 接收确认
-				memset(szMessage, '\0', sizeof(szMessage));
-				iRecv = recv(m_dwSocket, szMessage, 81, 0);
-				szMessage[iRecv] = '\0';
-
-				// 发送压缩的DIB
-				fTransmit = Transmit(pGdiNode->Gdi.pDIBCompress, dwSendLen);
-
-				// 释放压缩的DIB
-				free(pGdiNode->Gdi.pDIBCompress);
- 				// 接收确认
-				memset(szMessage, '\0', sizeof(szMessage));
-				iRecv = recv(m_dwSocket, szMessage, 81, 0);
-				szMessage[iRecv] = '\0';
-			}
-			pGdiNode = pGdiNode->pNext;
-		}
-	}
-	return iUpdates;
-}
-
 //传输数据到客户端
-BOOL CGdiServer::Transmit(BYTE *pData, DWORD dwLength)
+BOOL CGdiServer::Transmit(DWORD dwClientSocket, BYTE *pData, DWORD dwLength)
 {
 	WSAOVERLAPPED	olSend;
 	WSAEVENT	gheventOlSock;
@@ -559,7 +572,7 @@ BOOL CGdiServer::Transmit(BYTE *pData, DWORD dwLength)
 	WSABUF		buffSend;
 	DWORD		dwRet, dwNumBytes, dwFlags;
 	int			nWSAError;
-//	BYTE		szError[81];
+	//	BYTE		szError[81];
 
 	// 为发送完成创建一个信号事件
 	gheventOlSock = WSACreateEvent();
@@ -574,27 +587,27 @@ BOOL CGdiServer::Transmit(BYTE *pData, DWORD dwLength)
 	// 持续发送，直到dwSendLen个字节被发送完成
 	while (TRUE)
 	{
-		if ((dwRet = WSASend(m_dwSocket, &buffSend, 1, &dwNumBytes, 0, &olSend, NULL)) == SOCKET_ERROR)
+		if ((dwRet = WSASend(dwClientSocket, &buffSend, 1, &dwNumBytes, 0, &olSend, NULL)) == SOCKET_ERROR)
 		{
 			nWSAError = WSAGetLastError();
 			if (nWSAError != ERROR_IO_PENDING)
 			{
-// 				sprintf_s(szError, "WSASend failed with error %d\n", nWSAError);
-// 				MessageBox(NULL, szError, "Server", MB_OK);
+				// 				sprintf_s(szError, "WSASend failed with error %d\n", nWSAError);
+				// 				MessageBox(NULL, szError, "Server", MB_OK);
 			}
 		}
 
 		if (WSAWaitForMultipleEvents(1, eventArray, FALSE, WSA_INFINITE, FALSE) == WSA_WAIT_FAILED)
 		{
-// 			sprintf_s(szError, "WSAWaitForMultipleEvents failed %d\n", WSAGetLastError());
-// 			MessageBox(NULL, szError, "Server", MB_OK);
+			// 			sprintf_s(szError, "WSAWaitForMultipleEvents failed %d\n", WSAGetLastError());
+			// 			MessageBox(NULL, szError, "Server", MB_OK);
 		}
 		// 重置gheventOlSock
 		WSAResetEvent(eventArray[0]);
-		if (WSAGetOverlappedResult(m_dwSocket, &olSend, &dwNumBytes, FALSE, &dwFlags) == FALSE)
+		if (WSAGetOverlappedResult(dwClientSocket, &olSend, &dwNumBytes, FALSE, &dwFlags) == FALSE)
 		{
-// 			sprintf_s(szError, "WSAGetOverlappedResult failed with error %d\n", WSAGetLastError());
-// 			MessageBox(NULL, szError, "Server", MB_OK);
+			// 			sprintf_s(szError, "WSAGetOverlappedResult failed with error %d\n", WSAGetLastError());
+			// 			MessageBox(NULL, szError, "Server", MB_OK);
 		}
 		buffSend.len -= dwNumBytes;
 		if (buffSend.len == 0)
@@ -607,6 +620,323 @@ BOOL CGdiServer::Transmit(BYTE *pData, DWORD dwLength)
 	WSACloseEvent(gheventOlSock);
 	return TRUE;
 }
+
+int CGdiServer::SelectProtocols(DWORD dwSetFlags, DWORD dwNotSetFlags, LPWSAPROTOCOL_INFO lpProtocolBuffer, LPDWORD lpdwBufferLength, WSAPROTOCOL_INFO *pProtocol)
+{
+	LPBYTE				pBuf;
+	LPWSAPROTOCOL_INFO	pInfo;
+	DWORD				dwNeededLen;
+	LPWSAPROTOCOL_INFO	pRetInfo;
+	DWORD				dwRetLen;
+	int					nCount;
+	int					nMatchCount;
+	int					nRet;
+
+	// 决定需要的缓冲区大小
+	dwNeededLen = 0;
+	nRet = WSAEnumProtocols(NULL, NULL, &dwNeededLen);
+	if (nRet == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSAENOBUFS)
+			return SOCKET_ERROR;
+	}
+	// 分配大小
+	pBuf = (LPBYTE)malloc(dwNeededLen);
+	if (pBuf == NULL)
+	{
+		WSASetLastError(WSAENOBUFS);
+		return SOCKET_ERROR;
+	}
+
+	nRet = WSAEnumProtocols(NULL, (LPWSAPROTOCOL_INFO)pBuf, &dwNeededLen);
+	if (nRet == SOCKET_ERROR)
+	{
+		free(pBuf);
+		return SOCKET_ERROR;
+	}
+
+#define REJECTSET(f) \
+	    ((dwSetFlags & f) && !(pInfo->dwServiceFlags1 & f))
+#define REJECTNOTSET(f) \
+	    ((dwNotSetFlags &f) && (pInfo->dwServiceFlags1 & f))
+#define REJECTEDBY(f) (REJECTSET(f) || REJECTNOTSET(f))
+
+	pInfo = (LPWSAPROTOCOL_INFO)pBuf;
+	pRetInfo = lpProtocolBuffer;
+	dwRetLen = 0;
+	nMatchCount = 0;
+	for (nCount = 0; nCount < nRet; nCount++)
+	{
+		while (1)
+		{
+			if (REJECTEDBY(XP1_CONNECTIONLESS))
+				break;
+			if (REJECTEDBY(XP1_GUARANTEED_DELIVERY))
+				break;
+			if (REJECTEDBY(XP1_GUARANTEED_ORDER))
+				break;
+			if (REJECTEDBY(XP1_MESSAGE_ORIENTED))
+				break;
+			if (REJECTEDBY(XP1_PSEUDO_STREAM))
+				break;
+			if (REJECTEDBY(XP1_GRACEFUL_CLOSE))
+				break;
+			if (REJECTEDBY(XP1_EXPEDITED_DATA))
+				break;
+			if (REJECTEDBY(XP1_CONNECT_DATA))
+				break;
+			if (REJECTEDBY(XP1_DISCONNECT_DATA))
+				break;
+			if (REJECTEDBY(XP1_SUPPORT_BROADCAST))
+				break;
+			if (REJECTEDBY(XP1_SUPPORT_MULTIPOINT))
+				break;
+			if (REJECTEDBY(XP1_MULTIPOINT_DATA_PLANE))
+				break;
+			if (REJECTEDBY(XP1_QOS_SUPPORTED))
+				break;
+			if (REJECTEDBY(XP1_UNI_SEND))
+				break;
+			if (REJECTEDBY(XP1_UNI_RECV))
+				break;
+			if (REJECTEDBY(XP1_IFS_HANDLES))
+				break;
+			if (REJECTEDBY(XP1_PARTIAL_MESSAGE))
+				break;
+
+			dwRetLen += sizeof(WSAPROTOCOL_INFO);
+
+			if (dwRetLen > *lpdwBufferLength)
+			{
+				WSASetLastError(WSAENOBUFS);
+				*lpdwBufferLength = dwNeededLen;
+				free(pBuf);
+				return SOCKET_ERROR;
+			}
+			nMatchCount++;
+			// 拷贝协议到调用者的buffer里
+			memblast(pRetInfo, pInfo, sizeof(WSAPROTOCOL_INFO));
+//			if (strcmp(pInfo->szProtocol, "MSAFD Tcpip [TCP/IP]") == 0)
+			{
+				memblast(pProtocol, pInfo, sizeof(WSAPROTOCOL_INFO));
+			}
+			pRetInfo++;
+			break;
+		}
+		pInfo++;
+	}
+	free(pBuf);
+	*lpdwBufferLength = dwRetLen;
+	return(nMatchCount);
+}
+
+#pragma endregion 内部实现
+struct ST_GdiServerList* CGdiServer::Add_Gdi(struct ST_GdiServerList *pNode, struct ST_GdiServerDS Gdi)
+{
+	// 添加到链表的末尾
+	if (pNode->pNext = (struct ST_GdiServerList *)malloc(sizeof(struct ST_GdiServerList)))
+	{
+		pNode = pNode->pNext;
+
+		// 添加网格坐标
+		pNode->Gdi.iGridX = Gdi.iGridX;
+		pNode->Gdi.iGridY = Gdi.iGridY;
+
+		// 设置区域的矩形坐标
+		pNode->Gdi.iWidth1 = Gdi.iWidth1;
+		pNode->Gdi.iWidth2 = Gdi.iWidth2;
+		pNode->Gdi.iHeight1 = Gdi.iHeight1;
+		pNode->Gdi.iHeight2 = Gdi.iHeight2;
+
+		// 设置DIB颜色表的颜色数
+		pNode->Gdi.nColors = Gdi.nColors;
+
+		// 设置DIB信息头的字节数
+		pNode->Gdi.dwBitMapHeader = Gdi.dwBitMapHeader;
+
+		// 设置位图长度和起始坐标
+		pNode->Gdi.dwLen = Gdi.dwLen;
+		pNode->Gdi.dwCompress = Gdi.dwCompress;
+		pNode->Gdi.iStartPos = Gdi.iStartPos;
+
+		//设置DIB
+		pNode->Gdi.DIBitmap = Gdi.DIBitmap;
+
+		// 设置DIB信息头
+		pNode->Gdi.BMIH = Gdi.BMIH;
+
+		// 设置DIB信息头的指针
+		pNode->Gdi.lpBMIH = Gdi.lpBMIH;
+
+		// 设置区域的装置设备句柄
+		pNode->Gdi.hMemDC = Gdi.hMemDC;
+
+		// 设置区域的位图句柄
+		pNode->Gdi.hDIBitmap = Gdi.hDIBitmap;
+
+		// 区域无压缩DIB的指针
+		pNode->Gdi.pDIB = Gdi.pDIB;
+
+		//设置指向区域DIB变化的部分的指针
+		pNode->Gdi.pDIBChange = Gdi.pDIBChange;
+
+		//设置指向压缩区域的DIB的指针
+		pNode->Gdi.pDIBCompress = Gdi.pDIBCompress;
+
+		//设置指向全局区域位图指针
+		pNode->Gdi.pDIBitmap = Gdi.pDIBitmap;
+
+		// 区域位图标志
+		pNode->Gdi.fDIBitmap = Gdi.fDIBitmap;
+		pNode->Gdi.fChange = Gdi.fChange;
+
+		pNode->pNext = NULL;
+		return pNode;
+	}
+	return NULL;
+}
+
+// 完全清楚GDI链表
+void CGdiServer::Clear_Gdi()
+{
+	struct	ST_GdiServerList	*pPrev;
+	struct	ST_GdiServerList	*pNode;
+	while (pNode = pGdiNode->pNext)
+	{
+		pPrev = pGdiNode;
+		pPrev->pNext = pNode->pNext;
+		DeleteDC(pNode->Gdi.hMemDC);
+		DeleteObject(pNode->Gdi.hDIBitmap);
+		if (pNode->Gdi.fDIBitmap)
+		{
+			free(pNode->Gdi.pDIBitmap);
+			free(pNode->Gdi.pDIB);
+			free(pNode->Gdi.pDIBChangeStart);
+		}
+		free(pNode);
+	}
+}
+
+
+#pragma region 线程处理函数
+DWORD WINAPI CGdiServer::ListenThread(LPVOID lpParam)
+{
+	CGdiServer* pGdiServer = (CGdiServer*)lpParam;
+	sockaddr_in addrClient;
+	int nAddrSize = sizeof(sockaddr_in);
+	HANDLE	hThread = NULL;
+	DWORD	dwThreadId = 0;
+	// 这个结构用来在LPARAM参数中传递信息到客户端线程
+	struct	ST_GdiThreadParam	st;
+
+	// 用于计数，当指定数量的客户端连接了之后，就不用监听了
+	int		nCount = 0;
+
+	while (nCount < pGdiServer->m_nClientCount)
+	{
+		// 阻塞方式的接收客户端的连接，但因为这是一个线程函数，所以用户不会感到阻塞
+		DWORD dwSocket = accept(pGdiServer->m_dwListen, (struct sockaddr *)&addrClient, &nAddrSize);
+		if (pGdiServer->m_dwSocket != INVALID_SOCKET)
+		{
+			// 设置传到客户端线程的信息的数据结构
+			st.Socket = dwSocket;
+			st.pGdiServer = pGdiServer;
+			//找出客户端的IP地址
+			//memset(szClientIP, '\0', sizeof(szClientIP));
+			//sprintf(szClientIP, "%s", inet_ntoa(addrClient.sin_addr));
+			// 为每一个客户端创建一个线程
+			hThread = CreateThread(NULL, 0, ClientThread, (LPVOID)&st, 0, &dwThreadId);
+			if (hThread)
+			{
+				//关闭线程句柄
+				CloseHandle(hThread);
+			}
+		}
+		else
+		{
+			return -1;
+		}
+	}
+
+	return 0;
+
+}
+
+DWORD WINAPI CGdiServer::ClientThread(LPVOID lpParam)
+{
+	SOCKET	dwClient;
+	FD_SET	SocketSet;
+	struct	timeval	timeout;
+	char	szMessage[2049];
+	DWORD	iRecv;
+	struct	ST_GdiThreadParam	*pST;
+	DWORD	iRet;
+	int		iUpdates;
+
+	// 分析参数
+	pST = (struct ST_GdiThreadParam *)lpParam;
+	dwClient = pST->Socket;
+	CGdiServer* pGdiServer = (CGdiServer*)pST->pGdiServer;
+
+	// 设置超时值
+	timeout.tv_sec = 0;		// 秒
+	timeout.tv_usec = 0;	// 微秒
+
+	// 设置Socket集合
+	SocketSet.fd_count = 1;
+	SocketSet.fd_array[1] = dwClient;
+
+	bool bLoopFlag = true;
+
+	// 轮询sockets
+	while (bLoopFlag)
+	{
+		// 等候发送过来的数据直到超时
+		iRet = select(0, &SocketSet, NULL, NULL, &timeout);
+		if (iRet != 0)
+		{
+			//初始化缓冲
+			memset(szMessage, '\0', sizeof(szMessage));
+			// 阻塞方式调用recv()
+			iRecv = recv(dwClient, szMessage, 2048, 0);
+			int nType = *szMessage;
+
+			switch (nType)
+			{
+			case eMsgRegionDisplay:
+			{
+				// 捕获并且发送桌面的更新的区域
+				iUpdates = pGdiServer->SendRegionDisplay(dwClient);
+			}
+			break;
+			case eMsgResolution:
+			{
+				pGdiServer->SendResolution(dwClient);
+			}
+			break;
+			case eMsgDisconnect:
+			{
+				pGdiServer->fChange = FALSE;
+				pGdiServer->fDIBitmap = FALSE;
+				pGdiServer->ExitDisplay();
+
+				// 停止查询，相当于结束该线程
+				bLoopFlag = false;
+				break;
+
+			}
+			break;
+
+			default:
+				break;
+			}
+		}
+	}
+	closesocket(dwClient);
+
+	return 0;
+}
+#pragma endregion 线程处理函数
 
 
 

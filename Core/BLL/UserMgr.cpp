@@ -33,7 +33,7 @@ CUserMgr& CUserMgr::GetInstance()
 返 回 值:	bool :	是否成功
 功能说明:	注册用户
 *************************************************************/
-bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const EClientType& eType)
+bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const int& eType)
 {
 	char pStrSQL[1024] = { 0 };
 
@@ -69,7 +69,7 @@ bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const EClientType& e
 返 回 值:	bool :	是否成功
 功能说明:	登陆
 *************************************************************/
-bool CUserMgr::Login(const ST_LoginUserInfo& stLoginUserInfo, const EClientType& eType)
+bool CUserMgr::Login(const ST_LoginUserInfo& stLoginUserInfo, const int& eType)
 {
 	char pStrSQL[1024] = { 0 };
 	sprintf_s(pStrSQL, "select * from user where UserName = \"%s\" and UserPwd = md5(\"%s\") and UserType = %d;",

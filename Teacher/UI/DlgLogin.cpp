@@ -156,7 +156,7 @@ void CDlgLogin::OnLogin()
 	CStringA strPwdA(strPwd);
 
 	ST_MsgLogin msg;
-	msg.stMsgHead.clientType = eTeacher;
+	msg.stMsgHead.nSubType = eTeacher;
 
 	memcpy(msg.stLoginInfo.strUserName, strNameA.GetBuffer(), strNameA.GetLength());
 	memcpy(msg.stLoginInfo.strUserPwd, strPwdA.GetBuffer(), strPwdA.GetLength());
@@ -216,7 +216,7 @@ BOOL CDlgLogin::OnInitDialog()
 	// TODO:  在此添加额外的初始化
 	ST_MsgConnect stConnect;
 	GetCurrentIP(stConnect.arrIP);
-	stConnect.stMsgHead.clientType = eTeacher;
+	stConnect.stMsgHead.nSubType = eTeacher;
 	CTCPNet::GetInstance().SendToServer(&stConnect, sizeof(ST_MsgConnect));
 
 	CMsgHelperMain::GetInstance().SetHwnd(GetSafeHwnd());

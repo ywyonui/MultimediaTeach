@@ -1,8 +1,8 @@
 #pragma once
 #include <windows.h>
-#define	LPBMIH				LPBITMAPINFOHEADER
+#include <vector>
 
-struct GdiServerDS
+struct ST_GdiServerDS
 {
 	// 网格坐标
 	int		iGridX;
@@ -59,10 +59,10 @@ struct GdiServerDS
 
 };
 
-struct GdiServerList
+struct ST_GdiServerList
 {
-	struct	GdiServerDS	Gdi;
-	struct	GdiServerList	*pNext;
+	struct	ST_GdiServerDS	Gdi;
+	struct	ST_GdiServerList	*pNext;
 };
 
 class CGdiServer
@@ -72,80 +72,88 @@ private:
 	~CGdiServer();
 
 public:
-	static CGdiServer& GetInstance();
-
-public:
 	// GDI区域结构
-	struct	GdiServerList	GdiStart;
-	struct	GdiServerList	*pGdiNode;
+	struct	ST_GdiServerList	GdiStart;
+	struct	ST_GdiServerList	*pGdiNode = NULL;
 
 public:
 	int		nGridX = 8;
 	int		nGridY = 2;
-	DWORD	dwLen, dwCompress, dwSendLen;
 	int		iCompressionLevel = 10;
-	HWND	hServerWnd;
-	HDC		hDDC = NULL, hMemDC, hNullDC;
-	BOOL	fChange = FALSE;
-	int		iWidth, iHeight;
+
+	int		iWidth;
+	int		iHeight;
+
+	HDC		hDDC = NULL;
+	HDC		hMemDC = NULL;
+	HDC		hNullDC = NULL;
+	
+	BOOL	fDIBitmap = FALSE;	// 是否指向全局位图
+	BOOL	fChange = FALSE;	// 是否发生了改变
+
 	WORD	bmBitsPixel = 4;
-	// 指向全局位图
-	BOOL	fDIBitmap = FALSE;
+	DWORD	dwLen;
+	DWORD	dwCompress;
+	DWORD	dwSendLen;
 
 	DWORD	m_dwSocket;
+	DWORD	m_dwListen;
+	int		m_nPort;
+	int		m_nClientCount;		// 客户端计数器，只需要等待指定客户端个数连接到当前服务，就可以退出监听了
+	sockaddr_in m_addrServer;	// 服务器地址
+	
+	HWND	m_hWnd;
 
 public:
-	struct	GdiServerList	*Add_Gdi(struct GdiServerList *pNode, struct GdiServerDS Gdi);
-	void			Clear_Gdi(struct GdiServerList *pStart);
+#pragma region 外部调用
+	static CGdiServer& GetInstance();
 
-	void InitDisplay(HWND hWnd, DWORD dwSocket);
+	// 初始化
+	bool Init(HWND hWnd);
+	// 关闭
+	void Exit();
+
+#pragma endregion 外部调用
+	
+
+protected:
+#pragma region 内部实现
+	bool InitServer();
+
+	void InitDisplay();
+
+	void ExitServer();
 
 	void ExitDisplay();
 
 	//得到区域的显示位图
-	int GetRegionDisplay(HWND hWnd);
-
-	// 发送Resolution到客户端
-	void SendResolution();
-
-	// 通过socket发送区域显示位图
-	int SendRegionDisplay(HWND hWnd);
+	int GetRegionDisplay();
 
 	//传输数据到客户端
-	BOOL Transmit(BYTE *pData, DWORD dwLength);
+	BOOL Transmit(DWORD dwClientSocket, BYTE *pData, DWORD dwLength);
 
-public:
-	static void memblast(void* dest, void* src, DWORD count)
-	{
-		DWORD	iCount;
+	// 发送Resolution到客户端
+	void SendResolution(DWORD dwClientSocket);
 
-		__asm
-		{
-			MOV		ECX, count
-				SHR		ECX, 2
-				SHL		ECX, 2
-				MOV		iCount, ECX
+	// 通过socket发送区域显示位图
+	int SendRegionDisplay(DWORD dwClientSocket);
 
-				MOV		ESI, src
-				MOV		EDI, dest
-				MOV		ECX, iCount
-				SHR		ECX, 2
-				REP		MOVSD
+	int SelectProtocols(DWORD dwSetFlags, DWORD dwNotSetFlags, LPWSAPROTOCOL_INFO lpProtocolBuffer, LPDWORD lpdwBufferLength, WSAPROTOCOL_INFO *pProtocol);
 
-				MOV		ECX, count
-				MOV		EAX, iCount
-				SUB		ECX, EAX
+#pragma endregion 内部实现
+	ST_GdiServerList *Add_Gdi(ST_GdiServerList *pNode, ST_GdiServerDS Gdi);
+	void Clear_Gdi();
 
-				JZ		Exit
 
-				MOV		ESI, src
-				ADD		ESI, EAX
-				MOV		EDI, dest
-				ADD		EDI, EAX
-				REP		MOVSB
-			Exit :
-		}
-	}
+#pragma region 监听函数
+	// 监听函数
+	static DWORD WINAPI ListenThread(LPVOID lpParam);
+
+	//
+	static DWORD WINAPI ClientThread(LPVOID lpParam);
+#pragma endregion 监听函数
+
+
 
 };
 

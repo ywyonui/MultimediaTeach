@@ -109,7 +109,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DlgMain.h" />
-    <ClInclude Include="Logic\GDI\GdiClient.h" />
+    <ClInclude Include="Logic\GDI\GdiCommon.h" />
     <ClInclude Include="Logic\GDI\GdiServer.h" />
     <ClInclude Include="Logic\GDI\HuffCompress.h" />
     <ClInclude Include="Logic\GDI\RLE.h" />
@@ -125,7 +125,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DlgMain.cpp" />
-    <ClCompile Include="Logic\GDI\GdiClient.cpp" />
+    <ClCompile Include="Logic\GDI\GdiCommon.cpp" />
     <ClCompile Include="Logic\GDI\GdiServer.cpp" />
     <ClCompile Include="Logic\GDI\HuffCompress.cpp" />
     <ClCompile Include="Logic\GDI\RLE.cpp" />

@@ -15,9 +15,6 @@
 #define new DEBUG_NEW
 #endif
 
-#include "Logic/GDI/GdiClient.h"
-#include "Logic/GDI/GdiServer.h"
-
 // CDlgMain 对话框
 
 #define IDT_GET_SCREEN 101
@@ -166,11 +163,7 @@ void CDlgMain::OnTimer(UINT_PTR nIDEvent)
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
 	if (nIDEvent == IDT_GET_SCREEN)
 	{
-		ST_MsgCommand st;
-		st.stMsgHead.msgType = eMsgDisplay;
-		st.nSubType = 0;	// 初始化，通知客户端，准备接收数据
-		st.nLen = 0;
-		CTCPNet::GetInstance().SendToServer(&st, sizeof(ST_MsgCommand));
+
 	}
 	CDialogEx::OnTimer(nIDEvent);
 }
@@ -204,7 +197,7 @@ LRESULT CDlgMain::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
 void CDlgMain::AskForClientList()
 {
 	ST_MsgHead stHead;
-	stHead.clientType = eTeacher;
+	stHead.nSubType = eTeacher;
 	stHead.msgType = eMsgAskClientList;
 	CTCPNet::GetInstance().SendToServer(&stHead, sizeof(ST_MsgHead));
 }
@@ -285,7 +278,7 @@ void CDlgMain::OnBnClickedBtnLock()
 {
 	// TODO:  在此添加控件通知处理程序代码
 	ST_MsgHead msg;
-	msg.clientType = eTeacher;
+	msg.nSubType = eTeacher;
 
 	CString str;
 	GetDlgItem(IDC_BTN_LOCK)->GetWindowText(str);
@@ -322,21 +315,25 @@ void CDlgMain::OnBnClickedBtnDisplay()
 	CString strText;
 	GetDlgItem(IDC_BTN_DISPLAY)->GetWindowText(strText);
 
+	ST_MsgHead msg;
+	msg.nSubType = eTeacher;
+
 	if (strText == _T("演示"))
 	{
-		// 1、初始化屏幕数据采集服务器
-		CGdiServer::GetInstance().InitDisplay(GetSafeHwnd(), CMsgHelperMain::GetInstance().GetSocket());
-
-		// 2、将屏幕初始化数据传递给服务器，让服务器通知客户端创建显示窗口和对应的初始化显示数据
-		CGdiServer::GetInstance().SendResolution();
-
-		// 3、启动定时器，向服务器传输桌面数据
-		SetTimer(IDT_GET_SCREEN, 100, NULL);
+		// 1、保存消息
+		msg.msgType = eMsgBeginDisplay;
+		// 2、开启服务器
+		//	CGdiServer::GetInstance().Init();
 	}
 	else
 	{
-		KillTimer(IDT_GET_SCREEN);
+		// 1、保存消息
+		msg.msgType = eMsgEndDisplay;
+		// 2、关闭服务器
+		//	CGdiServer::GetInstance().Init();
 	}
+	// 让服务器通知其他客户端，开启或关闭了演示
+	CTCPNet::GetInstance().SendToServer(&msg, sizeof(ST_MsgHead));
 }
 
 // 点名
@@ -377,7 +374,7 @@ BOOL CDlgMain::DestroyWindow()
 	// TODO:  在此添加专用代码和/或调用基类
 
 	// 销毁屏幕数据采集服务器
-	CGdiServer::GetInstance().ExitDisplay();
+//	CGdiServer::GetInstance().Exit();
 
 	return CDialogEx::DestroyWindow();
 }

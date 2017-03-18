@@ -83,7 +83,12 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, (WPARAM)&msg, eMsgAskClientListResult);
 	}
 	break;
-	case eMsgDisplay:	// 获取列表返回消息
+	case eMsgBeginDisplay:	// 接受到开始演示
+	{
+
+	}
+	break;
+	case eMsgEndDisplay:	// 接受到开始演示
 	{
 
 	}

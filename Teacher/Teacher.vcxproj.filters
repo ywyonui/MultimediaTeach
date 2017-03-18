@@ -54,8 +54,8 @@
     <ClInclude Include="UI\DlgSetting.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Logic\GDI\GdiClient.h">
-      <Filter>Logic\GDI</Filter>
+    <ClInclude Include="UI\DlgDisplay.h">
+      <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="Logic\GDI\GdiServer.h">
       <Filter>Logic\GDI</Filter>
@@ -66,8 +66,8 @@
     <ClInclude Include="Logic\GDI\RLE.h">
       <Filter>Logic\GDI</Filter>
     </ClInclude>
-    <ClInclude Include="UI\DlgDisplay.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="Logic\GDI\GdiCommon.h">
+      <Filter>Logic\GDI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -92,8 +92,8 @@
     <ClCompile Include="UI\DlgSetting.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="Logic\GDI\GdiClient.cpp">
-      <Filter>Logic\GDI</Filter>
+    <ClCompile Include="UI\DlgDisplay.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="Logic\GDI\GdiServer.cpp">
       <Filter>Logic\GDI</Filter>
@@ -104,8 +104,8 @@
     <ClCompile Include="Logic\GDI\RLE.cpp">
       <Filter>Logic\GDI</Filter>
     </ClCompile>
-    <ClCompile Include="UI\DlgDisplay.cpp">
-      <Filter>UI</Filter>
+    <ClCompile Include="Logic\GDI\GdiCommon.cpp">
+      <Filter>Logic\GDI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

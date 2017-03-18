@@ -49,7 +49,7 @@ public:
 	返 回 值:	bool :	是否成功
 	功能说明:	注册用户
 	*************************************************************/
-	bool RegUser(const ST_RegUserInfo& stRegUserInfo, const EClientType& eType);
+	bool RegUser(const ST_RegUserInfo& stRegUserInfo, const int& eType);
 
 	/*************************************************************
 	函数名称:	Login
@@ -57,7 +57,7 @@ public:
 	返 回 值:	bool :	是否成功
 	功能说明:	登陆，目前登陆成功之后不需要获取返回数据，而是主窗口初始化的时候主动发起数据查询
 	*************************************************************/
-	bool Login(const ST_LoginUserInfo& stLoginUserInfo, const EClientType& eType);
+	bool Login(const ST_LoginUserInfo& stLoginUserInfo, const int& eType);
 
 	/*************************************************************
 	函数名称:	AskForClientList

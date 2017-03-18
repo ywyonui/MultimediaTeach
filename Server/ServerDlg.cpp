@@ -199,7 +199,7 @@ afx_msg LRESULT CServerDlg::OnMsgServerRecv(WPARAM wParam, LPARAM lParam)
 		return 0;
 	}
 	CWnd* pWnd = &m_edit_t;
-	if (pHead->clientType == eStudent)
+	if (pHead->nSubType == eStudent)
 	{
 		pWnd = &m_edit_s;
 	}

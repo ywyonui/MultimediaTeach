@@ -19,8 +19,6 @@
 */
 enum EClientType
 {
-	eClientToServerError = -1,
-	eClientToServerSuccess = 0,
 	eTeacher = 1,	// 教师端
 	eStudent = 2,	// 学生端
 };
@@ -58,7 +56,8 @@ enum EMsgType
 	eMsgLockScreen,			// 锁屏消息
 	eMsgUnLockScreen,		// 解锁消息
 
-	eMsgDisplay,			// 演示
+	eMsgBeginDisplay,		// 开始演示
+	eMsgEndDisplay,			// 结束演示
 
 	eMsgSettingStudentIP,	// 配置
 };
@@ -120,7 +119,7 @@ struct ST_ClientInfo
 {
 	DWORD		dwSocket;
 	char		arrIP[16];	// IP地址
-	EClientType		eCT;	// 客户端类型	
+	int			eCT;		// 客户端类型	
 	EClientStatus	eCS;	// 客户端状态信息
 };
 
@@ -131,12 +130,12 @@ struct ST_ClientInfo
 struct ST_MsgHead
 {
 	EMsgType msgType;
-	EClientType	clientType;	// 如果是客户端到服务器，表示客户端类型，从服务器到客户端则表示执行状态是否成功
+	int	nSubType;		// 一个附加数据，通常用于表示客户端类型，1，2
 
 	ST_MsgHead()
 	{
 		msgType = eMsgLogin;
-		clientType = eClientToServerSuccess;
+		nSubType = 0;
 	}
 };
 
@@ -237,20 +236,6 @@ struct ST_MsgAskClientListResult
 		stMsgHead.msgType = eMsgAskClientListResult;
 		nSize = 0;
 	}
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
-类    型 :	未定义类型消息
-功能说明 :	不知道具体的类型
-*/
-struct  ST_MsgCommand
-{
-	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
-	int			nSubType;	// 定义子类型，用于区分同一组消息中，不同步骤类型的功能
-	int			nLen;		// 后面的Message长度
-	char		pBuffer[0];
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////

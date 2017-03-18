@@ -108,6 +108,7 @@ xcopy /d /e /y "$(SolutionDir)Core\DataBase\libmysql.dll" "$(OutDir)"</Command>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Core\BLL\CoreDefine.h" />
     <ClInclude Include="Logic\MsgHelperMain.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Server.h" />

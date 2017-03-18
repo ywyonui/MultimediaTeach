@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include "HuffCompress.h"
-#include "GdiServer.h"
+#include "GdiCommon.h"
 
 DWORD	dwWeight[256];
 DWORD	dwCounts[256];
@@ -506,13 +506,13 @@ WORD HuffmanDictionary(BYTE *pInput,DWORD dwCount,DWORD *pByteTree,DWORD *pCodes
 	}
 
 	// Copy the Byte Tree
-	CGdiServer::memblast(pByteTree,&dwByteTree[0],dwStorage);
+	memblast(pByteTree,&dwByteTree[0],dwStorage);
 
 	// Build the Code List
 	HuffmanBuildCodes();
 
 	// Copy the Codes
-	CGdiServer::memblast(pCodes, &dwCodes[0], 2048);
+	memblast(pCodes, &dwCodes[0], 2048);
 
 	// Return the Tree Size
 	return wTreeSize;
@@ -842,7 +842,7 @@ DWORD HuffmanCompress(BYTE *pInput,DWORD dwCount,WORD iTreeSize,DWORD *pByteTree
 	D2W(&wByteTree[0],pByteTree,dwStorage/4);
 
 	// Copy the Byte Tree
-	CGdiServer::memblast(pOutput, &wByteTree[0], dwStorage / 2);
+	memblast(pOutput, &wByteTree[0], dwStorage / 2);
 	
 	// Restore the Pointer to the Start of the Input
 	pInput = pStartInput;
@@ -923,7 +923,7 @@ DWORD HuffmanUnCompress(BYTE *pInput,BYTE *pOutput)
 	}
 
 	// Copy the Decoding Byte Tree
-	CGdiServer::memblast(&wByteTree[0], pInput, dwStorage / 2);
+	memblast(&wByteTree[0], pInput, dwStorage / 2);
 
 	// Convert the WORD Byte Tree to a DWORD Byte Tree
 	W2D(&dwByteTree[0],&wByteTree[0],dwStorage/4);
