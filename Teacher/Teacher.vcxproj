@@ -108,11 +108,8 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Core\BLL\CoreDefine.h" />
     <ClInclude Include="DlgMain.h" />
-    <ClInclude Include="Logic\GDI\GdiCommon.h" />
-    <ClInclude Include="Logic\GDI\GdiServer.h" />
-    <ClInclude Include="Logic\GDI\HuffCompress.h" />
-    <ClInclude Include="Logic\GDI\RLE.h" />
     <ClInclude Include="Logic\MsgHelperMain.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -120,15 +117,12 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <ClInclude Include="Teacher.h" />
     <ClInclude Include="UI\DlgDisplay.h" />
     <ClInclude Include="UI\DlgLogin.h" />
+    <ClInclude Include="UI\DlgQuestion.h" />
     <ClInclude Include="UI\DlgReg.h" />
     <ClInclude Include="UI\DlgSetting.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DlgMain.cpp" />
-    <ClCompile Include="Logic\GDI\GdiCommon.cpp" />
-    <ClCompile Include="Logic\GDI\GdiServer.cpp" />
-    <ClCompile Include="Logic\GDI\HuffCompress.cpp" />
-    <ClCompile Include="Logic\GDI\RLE.cpp" />
     <ClCompile Include="Logic\MsgHelperMain.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -137,6 +131,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <ClCompile Include="Teacher.cpp" />
     <ClCompile Include="UI\DlgDisplay.cpp" />
     <ClCompile Include="UI\DlgLogin.cpp" />
+    <ClCompile Include="UI\DlgQuestion.cpp" />
     <ClCompile Include="UI\DlgReg.cpp" />
     <ClCompile Include="UI\DlgSetting.cpp" />
   </ItemGroup>

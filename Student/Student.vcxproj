@@ -106,6 +106,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Core\BLL\CoreDefine.h" />
     <ClInclude Include="Logic\MsgHelperMain.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -114,6 +115,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UI\DlgLockScreen.h" />
     <ClInclude Include="UI\DlgLogin.h" />
+    <ClInclude Include="UI\DlgQuestion.h" />
     <ClInclude Include="UI\DlgReg.h" />
   </ItemGroup>
   <ItemGroup>
@@ -126,6 +128,7 @@ xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"</C
     <ClCompile Include="DlgMain.cpp" />
     <ClCompile Include="UI\DlgLockScreen.cpp" />
     <ClCompile Include="UI\DlgLogin.cpp" />
+    <ClCompile Include="UI\DlgQuestion.cpp" />
     <ClCompile Include="UI\DlgReg.cpp" />
   </ItemGroup>
   <ItemGroup>

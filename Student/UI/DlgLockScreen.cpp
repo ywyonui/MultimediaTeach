@@ -30,7 +30,7 @@ void CDlgLockScreen::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CDlgLockScreen, CDialogEx)
-	ON_MESSAGE(EWND_MSG_CLIENT_RECV, &CDlgLockScreen::OnServerMsgResult)
+//	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -56,28 +56,8 @@ BOOL CDlgLockScreen::OnInitDialog()
 	}
 	MoveWindow(rc);
 
-	CMsgHelperMain::GetInstance().SetHwnd(GetSafeHwnd());
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常:  OCX 属性页应返回 FALSE
-}
-
-// 接收消息的函数
-LRESULT CDlgLockScreen::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
-{
-	switch ((EMsgType)lParam)
-	{
-	case eMsgUnLockScreen:
-	{
-		PostMessage(WM_COMMAND, IDOK, 0);
-	}
-	break;
-
-	default:
-		break;
-	}
-
-	return 0;
 }
 
 void CDlgLockScreen::SetIsFullScreen(bool bFlag)
@@ -95,4 +75,71 @@ BOOL CDlgLockScreen::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void CDlgLockScreen::OnPaint()
+{
+	CPaintDC dc(this); 
+
+// 	struct	ST_GdiClientList	*pNode;
+// 	int					iX1, iX2, iY1, iY2;
+// 
+// 	auto gdi = CGdiClient::GetInstance();
+// 
+// 	if (gdi.fDIBitmap)
+// 	{
+// 		CRect rc;
+// 		GetClientRect(&rc);
+// 		if (!gdi.fConnected)
+// 		{
+// 			m_hMemDC = CreateCompatibleDC(dc);
+// 			m_hDDBitmap = CreateCompatibleBitmap(dc, gdi.iScreenWidth, gdi.iScreenHeight);
+// 			SelectObject(m_hMemDC, m_hDDBitmap);
+// 		}
+// 		pNode = gdi.GdiStart.pNext;
+// 		while (pNode)
+// 		{
+// 			if (pNode->Gdi.fDIBitmap)
+// 			{
+// 				StretchDIBits(m_hMemDC,
+// 					pNode->Gdi.iWidth1, pNode->Gdi.iHeight1,
+// 					pNode->Gdi.lpBitmapIH->biWidth, pNode->Gdi.lpBitmapIH->biHeight,
+// 					0, 0,
+// 					pNode->Gdi.lpBitmapIH->biWidth, pNode->Gdi.lpBitmapIH->biHeight,
+// 					(LPBYTE)pNode->Gdi.lpBitmapIH + (pNode->Gdi.lpBitmapIH->biSize + (1 << pNode->Gdi.lpBitmapIH->biBitCount) * sizeof(RGBQUAD)),
+// 					(LPBITMAPINFO)pNode->Gdi.lpBitmapIH, DIB_RGB_COLORS, SRCCOPY);
+// 			}
+// 
+// 			if (gdi.fGridX)
+// 			{
+// 				iX1 = pNode->Gdi.iWidth1;
+// 				iY1 = pNode->Gdi.iHeight1;
+// 				iY2 = pNode->Gdi.iHeight2;
+// 
+// 				MoveToEx(m_hMemDC, iX1, iY1, NULL);
+// 				LineTo(m_hMemDC, iX1, iY2);
+// 			}
+// 
+// 			if (gdi.fGridY)
+// 			{
+// 				iX1 = pNode->Gdi.iWidth1;
+// 				iX2 = pNode->Gdi.iWidth2;
+// 				iY1 = pNode->Gdi.iHeight1;
+// 				MoveToEx(m_hMemDC, iX1, iY1, NULL);
+// 				LineTo(m_hMemDC, iX2, iY1);
+// 			}
+// 
+// 			pNode = pNode->pNext;
+// 		}
+// 
+// 		BitBlt(dc, 0, 0, gdi.iScreenWidth, gdi.iScreenHeight, m_hMemDC, 0, 0, SRCCOPY);
+// 		if (!gdi.fConnected)
+// 		{
+// 			DeleteObject(m_hDDBitmap);
+// 			DeleteDC(m_hMemDC);
+// 		}
+// 	}
+
+
 }

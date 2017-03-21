@@ -52,7 +52,7 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 	{
 		ST_MsgHead msg;
 		memcpy(&msg, vParam, sizeof(ST_MsgHead));
-		bool bSuccess = msg.clientType == 0;
+		bool bSuccess = msg.nSubType == 0;
 
 		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, bSuccess, stHead.msgType);
 	}
@@ -85,6 +85,14 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		}
 	}
 	break;
+	case eMsgLockScreen:	// 锁屏
+	case eMsgUnLockScreen:	// 解锁
+	case eMsgBeginDisplay:	// 接受到开始演示
+	case eMsgEndDisplay:	// 接受到结束演示
+	{
+		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, 0, stHead.msgType);
+	}
+	break;
 	case eMsgAskClientListResult:	// 获取列表返回消息
 	{
 		ST_MsgAskClientListResult msg;
@@ -92,13 +100,14 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, (WPARAM)&msg, stHead.msgType);
 	}
 	break;
-	case eMsgLockScreen:	// 锁屏
-	case eMsgUnLockScreen:	// 解锁
+	case eMsgFileTransmit:	// 文件传输消息
+	case eMsgQuestion:		// 提问
 	{
-		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, 0, stHead.msgType);
+		ST_MsgFileTransmit msg;
+		memcpy(&msg, vParam, sizeof(ST_MsgFileTransmit));
+		SendMessage(m_hWnd, EWND_MSG_CLIENT_RECV, (WPARAM)&msg, stHead.msgType);
 	}
 	break;
-	
 
 	}
 }

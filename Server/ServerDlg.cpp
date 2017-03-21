@@ -51,6 +51,17 @@ END_MESSAGE_MAP()
 
 // CServerDlg 消息处理程序
 
+CString CServerDlg::GetModulePath()
+{
+	CString    sPath;
+	GetModuleFileName(NULL, sPath.GetBufferSetLength(MAX_PATH + 1), MAX_PATH);
+	sPath.ReleaseBuffer();
+	int    nPos;
+	nPos = sPath.ReverseFind('\\');
+	sPath = sPath.Left(nPos);
+	return    sPath;
+}
+
 BOOL CServerDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -65,10 +76,32 @@ BOOL CServerDlg::OnInitDialog()
 	int nSH = GetSystemMetrics(SM_CYSCREEN);
 
 	MoveWindow(static_cast<int>(nSW * 0.1), static_cast<int>(nSH * 0.1), static_cast<int>(nSW * 0.8), static_cast<int>(nSH * 0.8));
-	
+
+	char arrData[MAX_PATH] = { 0 };
+	CStringA strDBIP, strDBName, strDBUser, strDBPwd, strDBFormat;
+	int nDBPort, nServerPort;
+	CStringA strINIPath = CStringA(GetModulePath());
+	strINIPath += "\\..\\config.ini";
+	GetPrivateProfileStringA("DataBase", "IP", "", arrData, MAX_PATH, strINIPath);
+	strDBIP = arrData;
+	memset(arrData, 0, MAX_PATH);
+	GetPrivateProfileStringA("DataBase", "DBName", "", arrData, MAX_PATH, strINIPath);
+	strDBName = arrData;
+	memset(arrData, 0, MAX_PATH);
+	GetPrivateProfileStringA("DataBase", "DBUser", "", arrData, MAX_PATH, strINIPath);
+	strDBUser = arrData;
+	memset(arrData, 0, MAX_PATH);
+	GetPrivateProfileStringA("DataBase", "DBPwd", "", arrData, MAX_PATH, strINIPath);
+	strDBPwd = arrData;
+	memset(arrData, 0, MAX_PATH);
+	GetPrivateProfileStringA("DataBase", "DBFormat", "", arrData, MAX_PATH, strINIPath);
+	strDBFormat = arrData;
+	nDBPort = GetPrivateProfileIntA("DataBase", "Port", 0, strINIPath);
+	nServerPort = GetPrivateProfileIntA("Server", "Port", 0, strINIPath);
+
 	std::string strReturn = "";
 	// 连接数据库
-	if (!CDBMySQL::GetInstance().ConnMySQL("192.168.18.100", 3306, "multimediateach", "test", "123456", "UTF-16", strReturn))
+	if (!CDBMySQL::GetInstance().ConnMySQL(strDBIP.GetBuffer(), nDBPort, strDBName.GetBuffer(), strDBUser.GetBuffer(), strDBPwd.GetBuffer(), strDBFormat.GetBuffer(), strReturn))
 	{
 		m_edit_me.SetWindowText(_T("数据库连接成功"));
 	}
@@ -86,7 +119,7 @@ BOOL CServerDlg::OnInitDialog()
 	m_edit_me.GetWindowText(str);
 	str += _T("\r\n");
 
-	if (CTCPNet::GetInstance().InitNet(1234, &msgHelper))
+	if (CTCPNet::GetInstance().InitNet(nServerPort, &msgHelper))
 	{
 		str += _T("服务器启动成功");
 		m_edit_me.SetWindowText(str);

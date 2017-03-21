@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Server", "Server\Server.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj", "{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net", "Net\Net.vcxproj", "{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -30,6 +32,14 @@ Global
 		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}.Release|Win32.ActiveCfg = Release|Win32
 		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}.Release|Win32.Build.0 = Release|Win32
 		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}.Release|x64.ActiveCfg = Release|Win32
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Debug|Win32.Build.0 = Debug|Win32
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Debug|x64.ActiveCfg = Debug|x64
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Debug|x64.Build.0 = Debug|x64
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Release|Win32.ActiveCfg = Release|Win32
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Release|Win32.Build.0 = Release|Win32
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Release|x64.ActiveCfg = Release|x64
+		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

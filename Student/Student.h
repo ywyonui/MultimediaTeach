@@ -24,6 +24,8 @@ public:
 public:
 	virtual BOOL InitInstance();
 
+	static CString GetModulePath();
+
 // й╣ож
 
 	DECLARE_MESSAGE_MAP()

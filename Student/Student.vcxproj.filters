@@ -51,6 +51,12 @@
     <ClInclude Include="UI\DlgLockScreen.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="..\Core\BLL\CoreDefine.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\DlgQuestion.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Student.cpp">
@@ -72,6 +78,9 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="UI\DlgLockScreen.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\DlgQuestion.cpp">
       <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>

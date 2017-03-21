@@ -27,6 +27,10 @@ protected:
 	CEdit m_edit_t;
 	CEdit m_edit_s;
 
+public:
+	static CString GetModulePath();
+
+
 // й╣ож
 protected:
 	HICON m_hIcon;

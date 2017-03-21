@@ -11,6 +11,7 @@
 #include <string>
 
 #define MAX_STUDENT_CLIENT 10
+#define MAX_FILE_TRANS_SIZE	1024
 
 #pragma region 枚举类型
 /**
@@ -58,6 +59,11 @@ enum EMsgType
 
 	eMsgBeginDisplay,		// 开始演示
 	eMsgEndDisplay,			// 结束演示
+
+	eMsgFileTransmit,		// 文件传输
+
+	eMsgQuestion,			// 提问
+
 
 	eMsgSettingStudentIP,	// 配置
 };
@@ -155,6 +161,27 @@ struct ST_MsgConnect
 		stMsgHead.msgType = eMsgConnect;
 	}
 };
+
+
+/**
+类    型 :	文件传输
+功能说明 :
+*/
+struct ST_MsgFileTransmit
+{
+	ST_MsgHead	stMsgHead;	// 消息头，记录类型及其他相关信息
+	char arrFileName[MAX_PATH];
+	char arrData[MAX_FILE_TRANS_SIZE];		// 一次传输的数据
+
+	ST_MsgFileTransmit()
+	{
+		stMsgHead.msgType = eMsgFileTransmit;
+		stMsgHead.nSubType = 0;	// 这个可以是一个标记，标记当前传输的是第几组数据
+		memset(arrFileName, 0, MAX_PATH);
+		memset(arrData, 0, MAX_FILE_TRANS_SIZE);
+	}
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**

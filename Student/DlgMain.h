@@ -6,7 +6,9 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 #include "UI/DlgLockScreen.h"
-
+#include <string>
+#include <vector>
+#include "BLL/CoreDefine.h"
 
 // CDlgMain 对话框
 class CDlgMain : public CDialogEx
@@ -34,6 +36,9 @@ private:
 	int		m_nBtnWidth;
 	int		m_nBtnHeight;
 
+	CString m_strFileName;
+	std::vector<ST_MsgFileTransmit> m_vecFileData;
+
 protected:
 	/*************************************************************
 	函数名称:	SearchUserList
@@ -45,6 +50,12 @@ protected:
 
 	// 更新列表的数据
 	void UpdateList(WPARAM wParam);
+
+	// 设置文件数据
+	void TransmitFileData(WPARAM wParam);
+
+	// 显示问题窗口
+	void ShowQuestion(WPARAM wParam);
 
 	// 调整按钮位置的通用函数
 	void MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn = FALSE);
@@ -68,4 +79,8 @@ protected:
 
 public:
 	afx_msg void OnDestroy();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnBnClickedBtnHand();
+	afx_msg void OnBnClickedBtnSubmit();
+	afx_msg void OnBnClickedBtnQuestion();
 };

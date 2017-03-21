@@ -8,6 +8,7 @@
 #include "DlgMain.h"
 
 #include "UI/DlgSetting.h"
+#include "UI/DlgQuestion.h"
 
 #include "Logic/MsgHelperMain.h"
 
@@ -311,59 +312,116 @@ void CDlgMain::OnBnClickedBtnSetting()
 void CDlgMain::OnBnClickedBtnDisplay()
 {
 	// TODO:  在此添加控件通知处理程序代码
+	MessageBox(_T("后续功能尚在开发中，敬请期待！"));
 
-	CString strText;
-	GetDlgItem(IDC_BTN_DISPLAY)->GetWindowText(strText);
-
-	ST_MsgHead msg;
-	msg.nSubType = eTeacher;
-
-	if (strText == _T("演示"))
-	{
-		// 1、保存消息
-		msg.msgType = eMsgBeginDisplay;
-		// 2、开启服务器
-		//	CGdiServer::GetInstance().Init();
-	}
-	else
-	{
-		// 1、保存消息
-		msg.msgType = eMsgEndDisplay;
-		// 2、关闭服务器
-		//	CGdiServer::GetInstance().Init();
-	}
-	// 让服务器通知其他客户端，开启或关闭了演示
-	CTCPNet::GetInstance().SendToServer(&msg, sizeof(ST_MsgHead));
+// 	CString strText;
+// 	GetDlgItem(IDC_BTN_DISPLAY)->GetWindowText(strText);
+// 
+// 	ST_MsgHead msg;
+// 	msg.nSubType = eTeacher;
+// 
+// 	if (strText == _T("演示"))
+// 	{
+// 		// 1、保存消息
+// 		msg.msgType = eMsgBeginDisplay;
+// 		// 2、开启服务器
+// 		CGdiServer::GetInstance().Init(GetSafeHwnd(), 1);
+// 	}
+// 	else
+// 	{
+// 		// 1、保存消息
+// 		msg.msgType = eMsgEndDisplay;
+// 		// 2、关闭服务器
+// 		CGdiServer::GetInstance().Exit();
+// 	}
+// 	// 让服务器通知其他客户端，开启或关闭了演示
+// 	CTCPNet::GetInstance().SendToServer(&msg, sizeof(ST_MsgHead));
 }
 
 // 点名
 void CDlgMain::OnBnClickedBtnRollCall()
 {
 	// TODO:  在此添加控件通知处理程序代码
+	MessageBox(_T("后续功能尚在开发中，敬请期待！"));
 }
 
 // 提问
 void CDlgMain::OnBnClickedBtnAsk()
 {
 	// TODO:  在此添加控件通知处理程序代码
+	CDlgQuestion dlg(this);
+	dlg.DoModal();
 }
 
 // 教鞭
 void CDlgMain::OnBnClickedBtnPen()
 {
 	// TODO:  在此添加控件通知处理程序代码
+	MessageBox(_T("后续功能尚在开发中，敬请期待！"));
 }
 
 // 问题库
 void CDlgMain::OnBnClickedBtnQuestion()
 {
 	// TODO:  在此添加控件通知处理程序代码
+	MessageBox(_T("后续功能尚在开发中，敬请期待！"));
 }
 
 // 文件传输
 void CDlgMain::OnBnClickedBtnFileTrans()
 {
 	// TODO:  在此添加控件通知处理程序代码
+	CFileDialog fileDlg(TRUE,  // TRUE打开Open，FALSE保存Save As文件对话框
+		_T(".txt"),  // 默认的打开文件的类型
+		CTeacherApp::GetModulePath(), // 默认打开的文件名 
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR,  // 单选打开
+		_T("文本文件(*.txt)|*.txt|所有文件(*.*) |*.*||")  // 打开的文件类型
+		);
+	CString strFilePath = _T("E:\\projects\\C_C++\\MultimediaTeach\\Core\\DataBase\\DBMySQL.h");
+
+	if (fileDlg.DoModal() != IDOK)
+	{
+		return;
+	}
+	strFilePath = fileDlg.GetPathName();//返回选择或输入的文件名称，
+
+	CFile file;
+	BOOL bFlag = file.Open(strFilePath, CFile::typeBinary | CFile::modeRead);
+	CStdioFile stdFile;
+	stdFile.Open(strFilePath, CFile::typeBinary | CFile::modeRead);
+
+	CString strData;
+	stdFile.ReadString(strData);
+
+	if (!bFlag)
+	{
+		MessageBox(_T("打开文件失败！\n"));
+		return;
+	}
+	file.Seek(CFile::begin, 0);
+
+	int nPos = strFilePath.ReverseFind('\\');
+	CString strFileName = strFilePath.Right(strFilePath.GetLength() - nPos - 1);
+	CStringA strFileNameA(strFileName);
+
+	TRACE(_T("File Length: %d,\t Count: %d\n"), file.GetLength(), file.GetLength() / MAX_FILE_TRANS_SIZE);
+	
+	ST_MsgFileTransmit msg;
+	memcpy(msg.arrFileName, strFileNameA.GetBuffer(), strFileNameA.GetLength() + 1);
+	
+	int n = 0;
+	while ((msg.stMsgHead.nSubType = file.Read(msg.arrData, MAX_FILE_TRANS_SIZE)) > 0)
+	{
+		n++;
+		CTCPNet::GetInstance().SendToServer(&msg, sizeof(ST_MsgFileTransmit));
+		memset(msg.arrData, 0, MAX_FILE_TRANS_SIZE);
+		Sleep(100);
+	}
+
+	TRACE(_T("Transmit Count: %d\n"), n);
+
+
+	file.Close();
 }
 
 #pragma endregion 按钮

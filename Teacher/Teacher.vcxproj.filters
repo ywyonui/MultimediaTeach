@@ -19,9 +19,6 @@
     <Filter Include="UI">
       <UniqueIdentifier>{800913f3-49d8-4eba-8739-809df403821c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Logic\GDI">
-      <UniqueIdentifier>{42767e06-00b3-4cc1-9c40-1f173756864c}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -57,17 +54,11 @@
     <ClInclude Include="UI\DlgDisplay.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Logic\GDI\GdiServer.h">
-      <Filter>Logic\GDI</Filter>
+    <ClInclude Include="..\Core\BLL\CoreDefine.h">
+      <Filter>Logic</Filter>
     </ClInclude>
-    <ClInclude Include="Logic\GDI\HuffCompress.h">
-      <Filter>Logic\GDI</Filter>
-    </ClInclude>
-    <ClInclude Include="Logic\GDI\RLE.h">
-      <Filter>Logic\GDI</Filter>
-    </ClInclude>
-    <ClInclude Include="Logic\GDI\GdiCommon.h">
-      <Filter>Logic\GDI</Filter>
+    <ClInclude Include="UI\DlgQuestion.h">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -95,17 +86,8 @@
     <ClCompile Include="UI\DlgDisplay.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="Logic\GDI\GdiServer.cpp">
-      <Filter>Logic\GDI</Filter>
-    </ClCompile>
-    <ClCompile Include="Logic\GDI\HuffCompress.cpp">
-      <Filter>Logic\GDI</Filter>
-    </ClCompile>
-    <ClCompile Include="Logic\GDI\RLE.cpp">
-      <Filter>Logic\GDI</Filter>
-    </ClCompile>
-    <ClCompile Include="Logic\GDI\GdiCommon.cpp">
-      <Filter>Logic\GDI</Filter>
+    <ClCompile Include="UI\DlgQuestion.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

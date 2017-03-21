@@ -9,13 +9,15 @@
 
 #include "BLL/CoreDefine.h"
 
+#include "UI/DlgQuestion.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
 // CDlgMain 对话框
-
+#define IDT_DISPLAY 100
 
 
 CDlgMain::CDlgMain(CWnd* pParent /*=NULL*/)
@@ -50,6 +52,10 @@ BEGIN_MESSAGE_MAP(CDlgMain, CDialogEx)
 	ON_WM_SIZE()
 	ON_MESSAGE(EWND_MSG_CLIENT_RECV, &CDlgMain::OnServerMsgResult)
 	ON_WM_DESTROY()
+	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_BTN_HAND, &CDlgMain::OnBnClickedBtnHand)
+	ON_BN_CLICKED(IDC_BTN_SUBMIT, &CDlgMain::OnBnClickedBtnSubmit)
+	ON_BN_CLICKED(IDC_BTN_QUESTION, &CDlgMain::OnBnClickedBtnQuestion)
 END_MESSAGE_MAP()
 
 
@@ -163,6 +169,16 @@ LRESULT CDlgMain::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
 		CMsgHelperMain::GetInstance().SetHwnd(GetSafeHwnd());
 	}
 	break;
+	case eMsgFileTransmit:
+	{
+		TransmitFileData(wParam);
+	}
+	break;
+	case eMsgQuestion:
+	{
+		ShowQuestion(wParam);
+	}
+	break;
 	case eMsgLockScreen:
 	{
 		m_pLockScreen->ShowWindow(SW_SHOW);
@@ -171,6 +187,21 @@ LRESULT CDlgMain::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
 	case eMsgUnLockScreen:
 	{
 		m_pLockScreen->ShowWindow(SW_HIDE);
+	}
+	break;
+	case eMsgBeginDisplay:
+	{
+// 		m_pLockScreen->ShowWindow(SW_SHOW);
+// 		CGdiClient::GetInstance().Init(m_pLockScreen->GetSafeHwnd());
+// 		CGdiClient::GetInstance().UpdateRegionalScreen(TRUE);
+// 		SetTimer(IDT_DISPLAY, 100, 0);
+	}
+	break;
+	case eMsgEndDisplay:
+	{
+// 		m_pLockScreen->ShowWindow(SW_HIDE);
+// 		CGdiClient::GetInstance().Exit();
+// 		KillTimer(IDT_DISPLAY);
 	}
 	break;
 
@@ -192,7 +223,7 @@ LRESULT CDlgMain::OnServerMsgResult(WPARAM wParam, LPARAM lParam)
 void CDlgMain::AskForClientList()
 {
 	ST_MsgHead stHead;
-	stHead.clientType = eStudent;
+	stHead.nSubType = eStudent;
 	stHead.msgType = eMsgAskClientList;
 	CTCPNet::GetInstance().SendToServer(&stHead, sizeof(ST_MsgHead));
 }
@@ -202,24 +233,24 @@ void CDlgMain::UpdateList(WPARAM wParam)
 {
 	m_listCtrl.DeleteAllItems();
 
-	ST_MsgAskClientListResult& st = *((ST_MsgAskClientListResult*)wParam);
+	ST_MsgAskClientListResult& msg = *((ST_MsgAskClientListResult*)wParam);
 
-	for (int i = 0; i < st.nSize; i++)
+	for (int i = 0; i < msg.nSize; i++)
 	{
 		CString str;
 		CStringA strA;
 		str.Format(_T("%d"), i + 1);
 		int nRow = m_listCtrl.InsertItem(i, str);
-		if (st.arrClient[i].eCT == eTeacher)
+		if (msg.arrClient[i].eCT == eTeacher)
 		{
 			str = _T("教师");
 		}
-		else if (st.arrClient[i].eCT == eStudent)
+		else if (msg.arrClient[i].eCT == eStudent)
 		{
 			str = _T("学生");
 		}
 		m_listCtrl.SetItemText(nRow, 1, str);
-		switch (st.arrClient[i].eCS)
+		switch (msg.arrClient[i].eCS)
 		{
 		case eClientConnect:
 		{
@@ -240,11 +271,59 @@ void CDlgMain::UpdateList(WPARAM wParam)
 			break;
 		}
 		m_listCtrl.SetItemText(nRow, 2, str);
-		strA = st.arrClient[i].arrIP;
+		strA = msg.arrClient[i].arrIP;
 		str = strA;
 		m_listCtrl.SetItemText(nRow, 3, str);
 	}
 
+}
+
+void CDlgMain::TransmitFileData(WPARAM wParam)
+{
+	ST_MsgFileTransmit& msg = *((ST_MsgFileTransmit*)wParam);
+
+	m_vecFileData.push_back(msg);
+	if (msg.stMsgHead.nSubType == MAX_FILE_TRANS_SIZE)
+	{
+		return;
+	}
+	CString strFilePath = CStudentApp::GetModulePath();
+	CStringA strFileNameA(msg.arrFileName);
+	strFilePath += _T("\\");
+	strFilePath += strFileNameA;
+
+	CFile file;
+	BOOL bFlag = file.Open(strFilePath, CFile::typeBinary | CFile::modeWrite | CFile::modeCreate);
+	if (!bFlag)
+	{
+		MessageBox(_T("打开或创建文件失败"));
+		return;
+	}
+	TRACE("recv file data %d\n", msg.stMsgHead.nSubType);
+
+	file.Seek(CFile::end, 0);
+	for (auto& it: m_vecFileData)
+	{
+		file.Write(it.arrData, it.stMsgHead.nSubType);
+	}
+	m_vecFileData.clear();
+
+	file.Close();
+}
+
+void CDlgMain::ShowQuestion(WPARAM wParam)
+{
+	ST_MsgFileTransmit& msg = *((ST_MsgFileTransmit*)wParam);
+	
+	CStringA strTitleA = msg.arrFileName;
+	CStringA strContentA = msg.arrData;
+
+	CString strTitle(strTitleA);
+	CString strContent(strContentA);
+
+	CDlgQuestion dlg(this);
+	dlg.SetQuestion(strTitle, strContent);
+	dlg.DoModal();
 }
 
 void CDlgMain::MoveBtn(CWnd& wnd, int& nX, int& nY, int cx, BOOL bIsLastBtn)
@@ -277,4 +356,37 @@ void CDlgMain::OnDestroy()
 		delete m_pLockScreen;
 		m_pLockScreen = NULL;
 	}
+}
+
+
+void CDlgMain::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	if (nIDEvent == IDT_DISPLAY)
+	{
+//		CGdiClient::GetInstance().UpdateRegionalScreen(FALSE);
+	}
+
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+void CDlgMain::OnBnClickedBtnHand()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	MessageBox(_T("后续功能尚在开发中，敬请期待！"));
+}
+
+
+void CDlgMain::OnBnClickedBtnSubmit()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	MessageBox(_T("后续功能尚在开发中，敬请期待！"));
+}
+
+
+void CDlgMain::OnBnClickedBtnQuestion()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	MessageBox(_T("后续功能尚在开发中，敬请期待！"));
 }

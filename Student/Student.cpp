@@ -38,6 +38,16 @@ CStudentApp::CStudentApp()
 
 CStudentApp theApp;
 
+CString CStudentApp::GetModulePath()
+{
+	CString    sPath;
+	GetModuleFileName(NULL, sPath.GetBufferSetLength(MAX_PATH + 1), MAX_PATH);
+	sPath.ReleaseBuffer();
+	int    nPos;
+	nPos = sPath.ReverseFind('\\');
+	sPath = sPath.Left(nPos);
+	return    sPath;
+}
 
 // CStudentApp 初始化
 
@@ -66,8 +76,16 @@ BOOL CStudentApp::InitInstance()
 	// 初始化消息处理类的数据
 	CMsgHelperMain& msgHelper = CMsgHelperMain::GetInstance();
 
-	if (!CTCPNet::GetInstance().InitNet(1234, &msgHelper, false, "127.0.0.1"))
-		// if (!InitNet(1234, NetMsgCallBack, false, "192.168.18.100"))
+	CTCPNet& tcpNet = CTCPNet::GetInstance();
+
+	char arrServerIP[16] = { 0 };
+	int nServerPort;
+	CStringA strINIPath = CStringA(GetModulePath());
+	strINIPath += "\\..\\config.ini";
+	GetPrivateProfileStringA("Server", "IP", "", arrServerIP, 16, strINIPath);
+	nServerPort = GetPrivateProfileIntA("Server", "Port", 0, strINIPath);
+
+	if (!tcpNet.InitNet(nServerPort, &msgHelper, false, arrServerIP))
 	{
 		AfxMessageBox(_T("连接服务器失败"));
 		return FALSE;

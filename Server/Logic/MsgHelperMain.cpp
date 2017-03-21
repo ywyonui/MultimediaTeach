@@ -18,6 +18,7 @@ private:
 	HWND m_hWnd;
 	std::string m_strToWnd;
 	std::vector<ST_ClientInfo> m_vecClientInfo;
+	std::string m_strFileName;
 
 public:
 	void SetHwnd(HWND hWnd) { m_hWnd = hWnd; }
@@ -39,7 +40,10 @@ public:
 	void SetStudentClientIP(DWORD dwID, void* vParam);
 
 	// 纯粹的消息转发
-	void TransmitMessageToClient(ST_MsgHead& msg, DWORD dwID = 0);
+	void TransmitMsgHeadToClient(ST_MsgHead& msg, DWORD dwID = 0);
+
+	// 转发完整消息
+	void  TransmitFileToClient(DWORD dwID, void* vParam);
 
 public:
 	void DisconnectCallBack(DWORD dwID);
@@ -220,7 +224,7 @@ void CMsgHelperMain::Imp::SetStudentClientIP(DWORD dwID, void* vParam)
 	}
 }
 // 锁屏
-void CMsgHelperMain::Imp::TransmitMessageToClient(ST_MsgHead& msg, DWORD dwID)
+void CMsgHelperMain::Imp::TransmitMsgHeadToClient(ST_MsgHead& msg, DWORD dwID)
 {
 	for (auto& it : m_vecClientInfo)
 	{
@@ -231,6 +235,18 @@ void CMsgHelperMain::Imp::TransmitMessageToClient(ST_MsgHead& msg, DWORD dwID)
 	}
 }
 
+void CMsgHelperMain::Imp::TransmitFileToClient(DWORD dwID, void* vParam)
+{
+	ST_MsgFileTransmit msg;
+	memcpy(&msg, vParam, sizeof(ST_MsgFileTransmit));
+	for (auto& it : m_vecClientInfo)
+	{
+		if (it.dwSocket != dwID && it.dwSocket)
+		{
+			CTCPNet::GetInstance().SendToClient(it.dwSocket, &msg, sizeof(ST_MsgFileTransmit));
+		}
+	}
+}
 
 #pragma endregion 消息处理
 
@@ -311,9 +327,15 @@ void CMsgHelperMain::NetMsgCallBack(DWORD dwID, void* vParam, int nLen)
 		m_pImp->SetStudentClientIP(dwID, vParam);
 	}
 	break;
+	case eMsgFileTransmit:
+	case eMsgQuestion:
+	{
+		m_pImp->TransmitFileToClient(dwID, vParam);
+	}
+	break;
 	default:	// 默认的转发给非消息源的所有其他客户端
 	{
-		m_pImp->TransmitMessageToClient(stHead, dwID);
+		m_pImp->TransmitMsgHeadToClient(stHead, dwID);
 	}
 	break;
 	}

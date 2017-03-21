@@ -79,7 +79,14 @@ BOOL CTeacherApp::InitInstance()
 
 	CTCPNet& tcpNet = CTCPNet::GetInstance();
 
-	if (!tcpNet.InitNet(1234, &msgHelper, false, "127.0.0.1"))
+	char arrServerIP[16] = { 0 };
+	int nServerPort;
+	CStringA strINIPath = CStringA(GetModulePath());
+	strINIPath += "\\..\\config.ini";
+	GetPrivateProfileStringA("Server", "IP", "", arrServerIP, 16, strINIPath);
+	nServerPort = GetPrivateProfileIntA("Server", "Port", 0, strINIPath);
+
+	if (!tcpNet.InitNet(nServerPort, &msgHelper, false, arrServerIP))
 	{
 		AfxMessageBox(_T("连接服务器失败"));
 		return FALSE;
