@@ -9,6 +9,9 @@
 /*******************************************************/
 
 #include "BaseNetMsgHelper.h"
+#include <mutex>
+
+#define MAX_NET_BUFFER_SIZE 2048
 
 /**
 	类    型 :	单例类，添加NET_API用于导出到DLL中
@@ -30,6 +33,9 @@ public:
 private:
 	DWORD m_ServerSocket;
 	DWORD m_ClientSocket;
+
+	std::mutex m_mutex;
+	CBaseNetMsgHelper*	m_pNetMsgHelper;
 
 #pragma endregion 私有变量
 

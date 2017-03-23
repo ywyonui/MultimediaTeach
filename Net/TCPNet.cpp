@@ -70,6 +70,7 @@ CTCPNet& CTCPNet::GetInstance(void)
 *************************************************************/
 bool CTCPNet::InitNet(unsigned uPort, CBaseNetMsgHelper* pMsgHelper, bool bServer /*= true*/, char* pAddr /*= NULL*/)
 {
+	m_pNetMsgHelper = pMsgHelper;
 	if (bServer)
 	{
 		// 如果是服务器
@@ -78,21 +79,21 @@ bool CTCPNet::InitNet(unsigned uPort, CBaseNetMsgHelper* pMsgHelper, bool bServe
 		WSAStartup(MAKEWORD(2, 2), &wsaData);
 
 		// 1、创建完成端口
-		HANDLE comletionPort = INVALID_HANDLE_VALUE;	// 完成端口
-		comletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+// 		HANDLE comletionPort = INVALID_HANDLE_VALUE;	// 完成端口
+// 		comletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+// 
+// 		// 创建CPU数的线程数
+// 		SYSTEM_INFO systemInfo;
+// 		GetSystemInfo(&systemInfo);
 
-		// 创建CPU数的线程数
-		SYSTEM_INFO systemInfo;
-		GetSystemInfo(&systemInfo);
+// 		ST_ServerData stServer;
+// 		stServer.completionPort = comletionPort;
+// 		stServer.pMsgHelper = pMsgHelper;
 
-		ST_ServerData stServer;
-		stServer.completionPort = comletionPort;
-		stServer.pMsgHelper = pMsgHelper;
-
-		for (int i = 0; i < (int)systemInfo.dwNumberOfProcessors; ++i)
-		{
-			CreateThread(NULL, 0, ServerWorkerThread, (void*)&stServer, 0, 0);
-		}
+// 		for (int i = 0; i < (int)systemInfo.dwNumberOfProcessors; ++i)
+// 		{
+// 			CreateThread(NULL, 0, ServerWorkerThread, (void*)&stServer, 0, 0);
+// 		}
 
 		// 2、创建SOCKET
 		SOCKET sServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -112,7 +113,7 @@ bool CTCPNet::InitNet(unsigned uPort, CBaseNetMsgHelper* pMsgHelper, bool bServe
 		addr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 		addr.sin_port = htons(uPort);
 
-		int ret = bind(sServer, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN));
+		int ret = ::bind(sServer, (SOCKADDR*)&addr, sizeof(SOCKADDR_IN));
 		if (-1 == ret)
 		{
 			cout << "绑定套接字和地址端口失败" << endl;
@@ -123,7 +124,7 @@ bool CTCPNet::InitNet(unsigned uPort, CBaseNetMsgHelper* pMsgHelper, bool bServe
 		listen(sServer, 5);
 
 		// 5、接收连接，因为随时可能有玩家连接，所以要不停的接收连接，所以创建线程接收连接
-		CreateThread(0, 0, AcceptConnectThread, (void*)comletionPort, 0, 0);
+		CreateThread(0, 0, AcceptConnectThread, (void*)this, 0, 0);
 
 	}
 	else
@@ -233,23 +234,30 @@ void CTCPNet::RegisterWSARecv(DWORD sClient, void* pIOData)
 *************************************************************/
 DWORD WINAPI CTCPNet::AcceptConnectThread(void* vParam)
 {
-	HANDLE completionPort = (HANDLE)vParam;
+//	HANDLE completionPort = (HANDLE)vParam;
+//	CTCPNet* pTcpNet = (CTCPNet*)vParam;
+
+	CTCPNet& tcpNet = CTCPNet::GetInstance();
 
 	SOCKADDR_IN clientAddr;
 	int nLen = sizeof(SOCKADDR_IN);
+	memset(&clientAddr, 0, nLen);
 
 	while (true)
 	{
 		// 线程中死循环，接收来自客户端的连接
 		SOCKET sClient = accept(GetInstance().m_ServerSocket, (SOCKADDR*)&clientAddr, &nLen);
 
-		// 把新连接过来的SOCKET加入到完成端口中
-		CreateIoCompletionPort((HANDLE)sClient, completionPort, (DWORD)sClient, 0);
+		CreateThread(NULL, 0, ServerWorkerThread, (void*)sClient, 0, 0);
 
-		// 激活一个WSARecv(代替recv)
-		LP_IO_OPERATION_DATA lpPerIOData = new IO_OPERATION_DATA;
 
-		GetInstance().RegisterWSARecv(sClient, lpPerIOData);
+		//// 把新连接过来的SOCKET加入到完成端口中
+		//CreateIoCompletionPort((HANDLE)sClient, completionPort, (DWORD)sClient, 0);
+
+		//// 激活一个WSARecv(代替recv)
+		//LP_IO_OPERATION_DATA lpPerIOData = new IO_OPERATION_DATA;
+
+		//GetInstance().RegisterWSARecv(sClient, lpPerIOData);
 
 	}
 	return 0;
@@ -264,70 +272,37 @@ DWORD WINAPI CTCPNet::AcceptConnectThread(void* vParam)
 *************************************************************/
 DWORD WINAPI CTCPNet::ServerWorkerThread(void* vParam)
 {
-	ST_ServerData* pStServer = (ST_ServerData*)vParam;
 
-	HANDLE completionPort = pStServer->completionPort;
-	CBaseNetMsgHelper* pMsgHelper = pStServer->pMsgHelper;
+	SOCKET sClient = (SOCKET)vParam;
+	CTCPNet& tcpNet = CTCPNet::GetInstance();
 
-	LP_IO_OPERATION_DATA lpPerIOData = NULL;
-
-	DWORD dwTransferredLen = 0;
-	
-	SOCKET sClient;
+	char buffer[MAX_NET_BUFFER_SIZE];
 
 	while (true)
 	{
-		if (NULL != lpPerIOData)
+		memset(buffer, 0, MAX_NET_BUFFER_SIZE);
+		int nRet = recv(sClient, buffer, MAX_NET_BUFFER_SIZE, 0);
+		
+		if (nRet > 0) // 接收到正常数据处理
 		{
-			memset(lpPerIOData, 0, sizeof(IO_OPERATION_DATA));
+			tcpNet.m_mutex.lock();
+			tcpNet.m_pNetMsgHelper->NetMsgCallBack(sClient, buffer, nRet);
+			tcpNet.m_mutex.unlock();
 		}
-
-		// 如果没有用完成端口，这个线程就是不停的recv来自客户端的消息
-		// 使用了完成端口，直接在消息队列中取消息
-		int ret = GetQueuedCompletionStatus(
-					completionPort,				// 完成端口
-					&dwTransferredLen,			// 消息大小
-					(PULONG_PTR)&sClient,		// 套接字
-					(LPOVERLAPPED*)&lpPerIOData,	// 消息数据
-					INFINITE					// 等待时间
-					);
-
-		switch (dwTransferredLen)
+		else if (nRet == 0) // 断开处理
 		{
-			case -1: 
-			{
-
-			}
+			tcpNet.m_pNetMsgHelper->DisconnectCallBack(sClient);
+			closesocket(sClient);
 			break;
-
-			case 0: 
-			{
-				cout << "客户端断开连接" << endl;
-				// 在AcceptConnectThread里面new出来的，因此每个客户端断开时delete掉
-				if (pMsgHelper && sClient < 100000)
-				{
-					pMsgHelper->DisconnectCallBack(sClient);
-				}
-				if (lpPerIOData)
-				{
-					delete lpPerIOData;
-					lpPerIOData = NULL;
-				}
-			}
-			break;
-
-			default:
-			{
-				if (pMsgHelper && lpPerIOData)
-				{
-					pMsgHelper->NetMsgCallBack(sClient, lpPerIOData->szMessage, dwTransferredLen);
-					// 激活一个WSARecv(代替recv)
-					GetInstance().RegisterWSARecv(sClient, lpPerIOData);
-				}
-			}
+		}
+		else // 出错处理
+		{
+			closesocket(sClient);
 			break;
 		}
 	}
+
+	return 0;
 }
 
 /*************************************************************
