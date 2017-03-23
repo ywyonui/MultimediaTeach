@@ -145,13 +145,22 @@ int CDBAdoController::ExecuteNonQuery(const std::string& strCommand)
 		AfxMessageBox(_T("数据库未连接"));
 		return 0;
 	}
-	if (strCommand.find("select") == std::string::npos)
+	if (strCommand.find("select") > -1)
 	{
 		AfxMessageBox(_T("当前函数只能执行非select的语句"));
 		return 0;
 	}
 	_variant_t effectLineCount = 0;
-	m_pConnection->Execute(_bstr_t(strCommand.c_str()), &effectLineCount, adCmdText);
+	try
+	{
+		m_pConnection->Execute(_bstr_t(strCommand.c_str()), &effectLineCount, adCmdText);
+	}
+	catch (_com_error e)
+	{
+		CStringA strA(e.ErrorMessage());
+		CString str(strA);
+		AfxMessageBox(str);
+	}
 
 	return (int)effectLineCount.intVal;
 }
@@ -169,7 +178,7 @@ CDBAdoRecordReader CDBAdoController::ExecuteReader(const std::string& strCommand
 		AfxMessageBox(_T("数据库未连接"));
 		return CDBAdoRecordReader();
 	}
-	if (strCommand.find("select") != std::string::npos)
+	if (strCommand.find("select") < 0)
 	{
 		AfxMessageBox(_T("当前函数只能执行select查询语句"));
 		return CDBAdoRecordReader();
@@ -187,7 +196,9 @@ CDBAdoRecordReader CDBAdoController::ExecuteReader(const std::string& strCommand
 	}
 	catch (_com_error e)
 	{
-		AfxMessageBox(_T("查询过程中发生错误"));
+		CStringA strA(e.ErrorMessage());
+		CString str(strA);
+		AfxMessageBox(str);
 		return CDBAdoRecordReader();
 	}
 
@@ -216,7 +227,7 @@ std::string CDBAdoController::ConnectStringBuilder(EDatabaseProvider eDB, std::s
 	{
 	case CDBAdoController::eAccess2000:
 	{
-		connectstring += "Provider=Microsoft.Jet.OLEDB.4.0;DataSource=";
+		connectstring += "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=";
 		if (strIP.length() != 0)
 		{
 			connectstring += "\\\\" + strIP + "\\" + strDataSource + ";";
@@ -234,7 +245,7 @@ std::string CDBAdoController::ConnectStringBuilder(EDatabaseProvider eDB, std::s
 	break;
 	case CDBAdoController::eAccess2010:
 	{
-		connectstring += "Provider=Microsoft.ACE.OLEDB.12.0;DataSource=";
+		connectstring += "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=";
 		if (strIP.length() != 0)
 		{
 			connectstring += "\\\\" + strIP + "\\" + strDataSource + ";";
@@ -312,7 +323,7 @@ CDBAdoRecordReader::CDBAdoRecordReader(const CDBAdoRecordReader& lhs)
 
 CDBAdoRecordReader::~CDBAdoRecordReader()
 {
-	if (m_recordSetPtr->State)
+	if (m_recordSetPtr && m_recordSetPtr->State)
 	{
 		m_recordSetPtr->Close();
 		m_recordSetPtr.Release();

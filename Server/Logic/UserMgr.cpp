@@ -38,7 +38,7 @@ bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const int& eType)
 	char pStrSQL[1024] = { 0 };
 
 	// 1、查询用户名是不是存在
-	sprintf_s(pStrSQL, "select UserName from user where UserName = \"%s\";",
+	sprintf_s(pStrSQL, "select UserName from gl_Account where UserName = \"%s\";",
 			  stRegUserInfo.strUserName);
 
 
@@ -54,7 +54,7 @@ bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const int& eType)
 		return false;
 	}
 	
-	sprintf_s(pStrSQL, "insert into user(UserName, UserPetName, UserPwd, UserType) values(\"%s\", \"%s\", \"%s\", %d );", 
+	sprintf_s(pStrSQL, "insert into gl_Account(UserName, UserPetName, UserPwd, UserType) values(\"%s\", \"%s\", \"%s\", %d );", 
 			  stRegUserInfo.strUserName, stRegUserInfo.strPetName, stRegUserInfo.strUserPwd, eType);
 
 	return CDBAdoController::GetInstance().ExecuteNonQuery(pStrSQL) == 1;
@@ -70,14 +70,17 @@ bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const int& eType)
 bool CUserMgr::Login(const ST_LoginUserInfo& stLoginUserInfo, const int& eType)
 {
 	char pStrSQL[1024] = { 0 };
-	sprintf_s(pStrSQL, "select * from user where UserName = \"%s\" and UserPwd = \"%s\" and UserType = %d;",
+	sprintf_s(pStrSQL, "select * from gl_Account where UserName = \"%s\" and UserPwd = \"%s\" and UserType = %d;",
 			  stLoginUserInfo.strUserName, stLoginUserInfo.strUserPwd, eType);
 
-	std::string strReturnMsg = "";
+	CDBAdoRecordReader record = CDBAdoController::GetInstance().ExecuteReader(pStrSQL);
 
-	std::vector<std::string> vecResData;
-
-	return CDBAdoController::GetInstance().ExecuteNonQuery(pStrSQL) == 1;
+	// 如果查到了数据，则表示用户名重复了
+	if (record.RecordCount() > 0)
+	{
+		return true;
+	}
+	return false;
 }
 
 
