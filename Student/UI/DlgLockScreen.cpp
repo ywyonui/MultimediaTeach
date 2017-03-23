@@ -6,7 +6,7 @@
 #include "DlgLockScreen.h"
 #include "afxdialogex.h"
 
-#include "BLL/CoreDefine.h"
+#include "Logic/CoreDefine.h"
 
 // CDlgLockScreen ¶Ô»°¿ò
 

@@ -7,7 +7,6 @@
 	功能说明:	
 **/
 /***************************************************************************************/
-#include "BaseBLL.h"
 #include "CoreDefine.h"
 #include <vector>
 
@@ -15,7 +14,7 @@
 	类    型 :	
 	功能说明 :	
 */
-class BLL_API CUserMgr
+class CUserMgr
 {
 public:
 	CUserMgr();

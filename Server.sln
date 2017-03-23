@@ -4,11 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Server", "Server\Server.vcxproj", "{19418C99-147C-47BC-B7C3-256EA6A1A57D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC} = {90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj", "{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net", "Net\Net.vcxproj", "{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}"
 EndProject
@@ -26,12 +21,6 @@ Global
 		{19418C99-147C-47BC-B7C3-256EA6A1A57D}.Release|Win32.ActiveCfg = Release|Win32
 		{19418C99-147C-47BC-B7C3-256EA6A1A57D}.Release|Win32.Build.0 = Release|Win32
 		{19418C99-147C-47BC-B7C3-256EA6A1A57D}.Release|x64.ActiveCfg = Release|Win32
-		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}.Debug|Win32.ActiveCfg = Debug|Win32
-		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}.Debug|Win32.Build.0 = Debug|Win32
-		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}.Debug|x64.ActiveCfg = Debug|Win32
-		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}.Release|Win32.ActiveCfg = Release|Win32
-		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}.Release|Win32.Build.0 = Release|Win32
-		{90E0E5FD-4AB3-411A-9BC0-8704EA6293FC}.Release|x64.ActiveCfg = Release|Win32
 		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Debug|Win32.ActiveCfg = Debug|Win32
 		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Debug|Win32.Build.0 = Debug|Win32
 		{006F4FEE-F79C-449E-BE3C-CA7B7DCC654C}.Debug|x64.ActiveCfg = Debug|x64

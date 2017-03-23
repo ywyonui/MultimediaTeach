@@ -6,7 +6,7 @@
 #include "DlgDisplay.h"
 #include "afxdialogex.h"
 
-#include "BLL/CoreDefine.h"
+#include "Logic/CoreDefine.h"
 
 
 // CDlgDisplay ¶Ô»°¿ò

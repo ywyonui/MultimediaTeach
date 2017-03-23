@@ -6,7 +6,7 @@
 #include "DlgQuestion.h"
 #include "afxdialogex.h"
 
-#include "BLL/CoreDefine.h"
+#include "Logic/CoreDefine.h"
 #include "Logic/MsgHelperMain.h"
 
 

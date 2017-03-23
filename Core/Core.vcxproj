@@ -87,6 +87,8 @@
     <ClInclude Include="BLL\BaseBLL.h" />
     <ClInclude Include="BLL\CoreDefine.h" />
     <ClInclude Include="BLL\UserMgr.h" />
+    <ClInclude Include="DataBase\DBADO.h" />
+    <ClInclude Include="DataBase\DBADOFwd.h" />
     <ClInclude Include="DataBase\DBMySQL.h" />
     <ClInclude Include="DataBase\DBMySQLFwd.h" />
     <ClInclude Include="stdafx.h" />
@@ -96,6 +98,7 @@
     <ClCompile Include="BLL\BaseBLL.cpp" />
     <ClCompile Include="BLL\UserMgr.cpp" />
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="DataBase\DBADO.cpp" />
     <ClCompile Include="DataBase\DBMySQL.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>

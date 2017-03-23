@@ -7,7 +7,7 @@
 #include "afxdialogex.h"
 
 #include "Logic/MsgHelperMain.h"
-#include "BLL/CoreDefine.h"
+#include "Logic/CoreDefine.h"
 
 
 // CDlgReg ¶Ô»°¿ò

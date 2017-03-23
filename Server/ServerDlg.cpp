@@ -9,8 +9,8 @@
 #include <string>
 
 #include "Logic/MsgHelperMain.h"
-#include "DataBase/DBMySQL.h"
-#include "BLL/CoreDefine.h"
+#include "DBAdo.h"
+#include "Logic/CoreDefine.h"
 
 #include <iostream>
 
@@ -78,38 +78,41 @@ BOOL CServerDlg::OnInitDialog()
 	MoveWindow(static_cast<int>(nSW * 0.1), static_cast<int>(nSH * 0.1), static_cast<int>(nSW * 0.8), static_cast<int>(nSH * 0.8));
 
 	char arrData[MAX_PATH] = { 0 };
-	CStringA strDBIP, strDBName, strDBUser, strDBPwd, strDBFormat;
-	int nDBPort, nServerPort;
+	CStringA strDBIP, strDBSource, strDBUser, strDBPwd;
+	int nServerPort = 0, nDBType = 0, nDBHasPwd = 0;
 	CStringA strINIPath = CStringA(GetModulePath());
 	strINIPath += "\\..\\config.ini";
+
+	GetPrivateProfileStringA("DataBase", "DBName", "", arrData, MAX_PATH, strINIPath);
+	strDBSource = arrData;
+	memset(arrData, 0, MAX_PATH);
 	GetPrivateProfileStringA("DataBase", "IP", "", arrData, MAX_PATH, strINIPath);
 	strDBIP = arrData;
-	memset(arrData, 0, MAX_PATH);
-	GetPrivateProfileStringA("DataBase", "DBName", "", arrData, MAX_PATH, strINIPath);
-	strDBName = arrData;
 	memset(arrData, 0, MAX_PATH);
 	GetPrivateProfileStringA("DataBase", "DBUser", "", arrData, MAX_PATH, strINIPath);
 	strDBUser = arrData;
 	memset(arrData, 0, MAX_PATH);
 	GetPrivateProfileStringA("DataBase", "DBPwd", "", arrData, MAX_PATH, strINIPath);
 	strDBPwd = arrData;
-	memset(arrData, 0, MAX_PATH);
-	GetPrivateProfileStringA("DataBase", "DBFormat", "", arrData, MAX_PATH, strINIPath);
-	strDBFormat = arrData;
-	nDBPort = GetPrivateProfileIntA("DataBase", "Port", 0, strINIPath);
 	nServerPort = GetPrivateProfileIntA("Server", "Port", 0, strINIPath);
+	nDBType = GetPrivateProfileIntA("DataBase", "DBType", 0, strINIPath);
+	nDBHasPwd = GetPrivateProfileIntA("DataBase", "DBHasPwd", 0, strINIPath);
 
 	std::string strReturn = "";
+
+	if (!CDBAdoController::GetInstance().Init())
+	{
+		m_edit_me.SetWindowText(_T("初始化数据库对象"));
+	}
+
 	// 连接数据库
-	if (!CDBMySQL::GetInstance().ConnMySQL(strDBIP.GetBuffer(), nDBPort, strDBName.GetBuffer(), strDBUser.GetBuffer(), strDBPwd.GetBuffer(), strDBFormat.GetBuffer(), strReturn))
+	if (CDBAdoController::GetInstance().Connect((CDBAdoController::EDatabaseProvider)nDBType, strDBSource.GetBuffer(), strDBIP.GetBuffer(), nDBHasPwd > 0, strDBUser.GetBuffer(), strDBPwd.GetBuffer()))
 	{
 		m_edit_me.SetWindowText(_T("数据库连接成功"));
 	}
 	else
 	{
-		CStringA strA(strReturn.c_str());
-		CString str(strA);
-		m_edit_me.SetWindowText(str);
+		m_edit_me.SetWindowText(_T("连接数据库失败"));
 	}
 	
 	CMsgHelperMain& msgHelper = CMsgHelperMain::GetInstance();
@@ -218,9 +221,6 @@ void CServerDlg::OnDestroy()
 	CDialogEx::OnDestroy();
 
 	// TODO:  在此处添加消息处理程序代码
-
-	// 断开数据库连接
-	CDBMySQL::GetInstance().DisConnMySQL();
 }
 
 

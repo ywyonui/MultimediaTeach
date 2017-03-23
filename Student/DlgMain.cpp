@@ -7,7 +7,7 @@
 #include "afxdialogex.h"
 #include "DlgMain.h"
 
-#include "BLL/CoreDefine.h"
+#include "Logic/CoreDefine.h"
 
 #include "UI/DlgQuestion.h"
 

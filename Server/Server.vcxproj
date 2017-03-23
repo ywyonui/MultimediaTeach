@@ -43,8 +43,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)Net\;$(SolutionDir)Core\;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Configuration)\bin\Net\;$(SolutionDir)$(Configuration)\bin\Core\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Net\;$(ProjectDir);$(ProjectDir)Database\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Configuration)\bin\Net\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -59,7 +59,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Net.lib;Core.lib</AdditionalDependencies>
+      <AdditionalDependencies>Net.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -73,9 +73,7 @@
     </ResourceCompile>
     <PostBuildEvent>
       <Command>xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Net\Net.dll" "$(OutDir)"
-xcopy /d /e /y "$(SolutionDir)$(Configuration)\bin\Core\Core.dll" "$(OutDir)"
-xcopy /d /e /y "$(SolutionDir)data" "$(OutDir)..\"
-xcopy /d /e /y "$(SolutionDir)Core\DataBase\libmysql.dll" "$(OutDir)"</Command>
+xcopy /d /e /y "$(SolutionDir)data" "$(OutDir)..\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -108,8 +106,11 @@ xcopy /d /e /y "$(SolutionDir)Core\DataBase\libmysql.dll" "$(OutDir)"</Command>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Core\BLL\CoreDefine.h" />
+    <ClInclude Include="Database\DBAdo.h" />
+    <ClInclude Include="Database\DBAdoFwd.h" />
+    <ClInclude Include="Logic\CoreDefine.h" />
     <ClInclude Include="Logic\MsgHelperMain.h" />
+    <ClInclude Include="Logic\UserMgr.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="ServerDlg.h" />
@@ -117,7 +118,9 @@ xcopy /d /e /y "$(SolutionDir)Core\DataBase\libmysql.dll" "$(OutDir)"</Command>
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Database\DBAdo.cpp" />
     <ClCompile Include="Logic\MsgHelperMain.cpp" />
+    <ClCompile Include="Logic\UserMgr.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="ServerDlg.cpp" />
     <ClCompile Include="stdafx.cpp">

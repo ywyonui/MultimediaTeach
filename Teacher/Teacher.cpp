@@ -8,7 +8,7 @@
 #include "UI/DlgLogin.h"
 
 #include "Logic/MsgHelperMain.h"
-#include "BLL/CoreDefine.h"
+#include "Logic/CoreDefine.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

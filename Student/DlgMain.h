@@ -8,7 +8,7 @@
 #include "UI/DlgLockScreen.h"
 #include <string>
 #include <vector>
-#include "BLL/CoreDefine.h"
+#include "Logic/CoreDefine.h"
 
 // CDlgMain ¶Ô»°¿ò
 class CDlgMain : public CDialogEx

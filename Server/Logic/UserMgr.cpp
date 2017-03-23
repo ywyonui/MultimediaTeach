@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "UserMgr.h"
 
-#include "DataBase/DBMySQL.h"
+#include "DBAdo.h"
 
 CUserMgr::CUserMgr()
 {
@@ -46,20 +46,18 @@ bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const int& eType)
 
 	std::vector<std::string> vecResData;
 
-	bool bSuccess = CDBMySQL::GetInstance().SelectData(pStrSQL, vecResData, 1, strReturnMsg);
+	CDBAdoRecordReader record = CDBAdoController::GetInstance().ExecuteReader(pStrSQL);
 
 	// 如果查到了数据，则表示用户名重复了
-	if (bSuccess && vecResData.size() > 0)
+	if (record.RecordCount() > 0)
 	{
 		return false;
 	}
 	
-	sprintf_s(pStrSQL, "insert into user(UserName, UserPetName, UserPwd, UserType) values(\"%s\", \"%s\", md5(\"%s\"), %d );", 
+	sprintf_s(pStrSQL, "insert into user(UserName, UserPetName, UserPwd, UserType) values(\"%s\", \"%s\", \"%s\", %d );", 
 			  stRegUserInfo.strUserName, stRegUserInfo.strPetName, stRegUserInfo.strUserPwd, eType);
 
-	std::string strReturn = "";
-
-	return CDBMySQL::GetInstance().InsertData(pStrSQL, strReturn);
+	return CDBAdoController::GetInstance().ExecuteNonQuery(pStrSQL) == 1;
 }
 
 /*************************************************************
@@ -72,21 +70,14 @@ bool CUserMgr::RegUser(const ST_RegUserInfo& stRegUserInfo, const int& eType)
 bool CUserMgr::Login(const ST_LoginUserInfo& stLoginUserInfo, const int& eType)
 {
 	char pStrSQL[1024] = { 0 };
-	sprintf_s(pStrSQL, "select * from user where UserName = \"%s\" and UserPwd = md5(\"%s\") and UserType = %d;",
+	sprintf_s(pStrSQL, "select * from user where UserName = \"%s\" and UserPwd = \"%s\" and UserType = %d;",
 			  stLoginUserInfo.strUserName, stLoginUserInfo.strUserPwd, eType);
 
 	std::string strReturnMsg = "";
 
 	std::vector<std::string> vecResData;
 
-	bool bSuccess = CDBMySQL::GetInstance().SelectData(pStrSQL, vecResData, 5, strReturnMsg);
-
-	if (!bSuccess || !vecResData.size())
-	{
-		return false;
-	}
-	
-	return true;
+	return CDBAdoController::GetInstance().ExecuteNonQuery(pStrSQL) == 1;
 }
 
 

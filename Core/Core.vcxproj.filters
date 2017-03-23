@@ -45,6 +45,12 @@
     <ClInclude Include="BLL\CoreDefine.h">
       <Filter>BLL</Filter>
     </ClInclude>
+    <ClInclude Include="DataBase\DBADO.h">
+      <Filter>DataBase</Filter>
+    </ClInclude>
+    <ClInclude Include="DataBase\DBADOFwd.h">
+      <Filter>DataBase</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -64,6 +70,9 @@
     </ClCompile>
     <ClCompile Include="BLL\UserMgr.cpp">
       <Filter>BLL</Filter>
+    </ClCompile>
+    <ClCompile Include="DataBase\DBADO.cpp">
+      <Filter>DataBase</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

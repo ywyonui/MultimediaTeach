@@ -12,7 +12,7 @@
 
 #include "Logic/MsgHelperMain.h"
 
-#include "BLL/CoreDefine.h"
+#include "Logic/CoreDefine.h"
 
 #include <string>
 

@@ -19,6 +19,9 @@
     <Filter Include="Logic">
       <UniqueIdentifier>{4cf2f0ab-84a3-4811-a09e-1eb3ac8d7e30}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Database">
+      <UniqueIdentifier>{48602513-d129-4ebb-ab94-aab272e52bb8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -42,8 +45,17 @@
     <ClInclude Include="Logic\MsgHelperMain.h">
       <Filter>Logic</Filter>
     </ClInclude>
-    <ClInclude Include="..\Core\BLL\CoreDefine.h">
+    <ClInclude Include="Logic\CoreDefine.h">
       <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="Logic\UserMgr.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="Database\DBAdo.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="Database\DBAdoFwd.h">
+      <Filter>Database</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +70,12 @@
     </ClCompile>
     <ClCompile Include="Logic\MsgHelperMain.cpp">
       <Filter>Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="Logic\UserMgr.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="Database\DBAdo.cpp">
+      <Filter>Database</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

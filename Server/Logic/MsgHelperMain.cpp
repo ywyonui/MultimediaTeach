@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MsgHelperMain.h"
 
-#include "BLL/UserMgr.h"
+#include "UserMgr.h"
 #include <vector>
 
 #include <iostream>

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MsgHelperMain.h"
 
-#include "BLL/CoreDefine.h"
+#include "Logic/CoreDefine.h"
 
 #include <windows.h>
 
